@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Flybridge Theses — How AI Learns and Where It Keeps Its Work</title>
-<meta name="description" content="Two Flybridge investment theses: continual learning, the race to keep models learning after they ship, and agentic file systems, the interface agents use to store context and produce work." />
+<title>Jason Rubenstein</title>
+<meta name="description" content="Jason Rubenstein's writing on continual learning and agentic file systems, plus a game of Pong against AI." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="pong-page">
 
 <div class="scroll-progress" aria-hidden="true"></div>
 
 <nav class="site-nav">
   <div class="site-nav__inner">
-    <a href="index.html" class="site-nav__brand">Flybridge <span>Theses</span></a>
+    <a href="index.html" class="site-nav__brand">Jason Rubenstein</a>
     <button class="site-nav__toggle" aria-label="Toggle menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
     <div class="site-nav__links">
-      <a href="index.html" class="is-active">Overview</a>
+      <a href="index.html" class="is-active">Home</a>
       <a href="continual-learning.html">Continual Learning</a>
       <a href="agentic-file-systems.html">Agentic File Systems</a>
     </div>
@@ -30,52 +30,58 @@
 
 <main>
 
-  <section class="hero">
-    <div class="container container--wide">
-      <span class="eyebrow reveal">Flybridge Investment Theses</span>
-      <h1 class="word-reveal">How AI learns, and where it keeps what it learns</h1>
-      <p class="lede hero__lede reveal">Two theses on the infrastructure underneath every agent. One asks how a model keeps learning after it ships. The other asks where an agent keeps its work while it does the job.</p>
-      <div class="hero__meta reveal">
-        <span>Jason Rubenstein</span>
-        <span class="dot"></span>
-        <span>Flybridge</span>
+  <section class="home-hero">
+    <div class="home-hero__inner">
+      <h1>Thanks for stopping by my website!</h1>
+      <span class="home-scroll-cue">Explore <span aria-hidden="true">↓</span></span>
+    </div>
+  </section>
+
+  <section class="home-writing section-border" aria-labelledby="writing-title">
+    <div class="container container--bleed">
+      <span class="eyebrow">Selected writing</span>
+      <h2 class="section-title" id="writing-title">Ideas I am exploring</h2>
+      <div class="thesis-links">
+        <a href="continual-learning.html" class="thesis-card">
+          <span class="thesis-card__num">01 · Model learning</span>
+          <h2>Continual Learning</h2>
+          <p>Why keeping models current after training remains one of AI's hardest unsolved problems.</p>
+          <span class="thesis-card__cta">Read the thesis <span class="arrow">→</span></span>
+        </a>
+        <a href="agentic-file-systems.html" class="thesis-card">
+          <span class="thesis-card__num">02 · Agent infrastructure</span>
+          <h2>Agentic File Systems</h2>
+          <p>Why file systems are becoming the interface agents use to store context and produce work.</p>
+          <span class="thesis-card__cta">Read the thesis <span class="arrow">→</span></span>
+        </a>
       </div>
-      <div class="scroll-cue" aria-hidden="true">
-        <div class="scroll-cue__line"></div>
-        <span>Scroll</span>
+    </div>
+  </section>
+
+  <section class="pong-shell section-border" aria-labelledby="pong-title">
+    <div class="pong-header">
+      <div>
+        <span class="eyebrow">One more thing</span>
+        <h2 id="pong-title">Try to beat my AI in Pong</h2>
+      </div>
+      <div class="pong-score" aria-live="polite">
+        <div><span>You</span><strong id="pong-player-score">0</strong></div>
+        <span class="pong-score__divider">:</span>
+        <div><span>AI</span><strong id="pong-ai-score">0</strong></div>
       </div>
     </div>
-  </section>
 
-  <section class="section--tight">
-    <div class="container reveal">
-      <p class="body-text">Frontier labs are racing toward systems that can build their own successors. Two bottlenecks stand in the way. Models forget nearly as fast as they learn, so every deployed system runs on knowledge frozen at ship date. And agents have no durable place to keep context, show their work, or undo a mistake, so every long task starts to strain against the tools built for humans. These theses look at the startups forming around each problem, and where the durable value is likely to land.</p>
+    <div class="pong-game" id="pong-game">
+      <canvas id="pong-canvas" width="960" height="540" tabindex="0" aria-label="Pong game. Move your paddle with the mouse, touch, or arrow keys."></canvas>
+      <div class="pong-overlay" id="pong-overlay">
+        <p id="pong-status">First to 7 wins</p>
+        <button class="pong-button" id="pong-start" type="button">Start game</button>
+      </div>
     </div>
-  </section>
 
-  <section class="section--tight">
-    <div class="thesis-links">
-
-      <a href="continual-learning.html" class="thesis-card reveal">
-        <span class="thesis-card__num">01 · Model Learning</span>
-        <h2>Continual Learning</h2>
-        <p>Billions of weights freeze the moment training stops. Continual learning keeps turning those dials after ship day. It ranks among the hardest unsolved problems in AI, and it gates the path to recursive self improvement.</p>
-        <span class="thesis-card__cta">Read the thesis <span class="arrow">→</span></span>
-      </a>
-
-      <a href="agentic-file-systems.html" class="thesis-card reveal">
-        <span class="thesis-card__num">02 · Agent Infrastructure</span>
-        <h2>Agentic File Systems</h2>
-        <p>Agents already write most of the code merged at leading labs. Each one needs somewhere to store context, prove what it did, and recover from mistakes. File systems are becoming that place.</p>
-        <span class="thesis-card__cta">Read the thesis <span class="arrow">→</span></span>
-      </a>
-
-    </div>
-  </section>
-
-  <section class="section--tight section-border">
-    <div class="container text-center reveal">
-      <p class="body-text" style="max-width: 56ch; margin: 0 auto; color: var(--text-tertiary); font-size: 0.92rem;">Both pages adapt Flybridge's internal research memos for the web. Company names, figures, and direct claims are pulled from those source documents, not invented for this site.</p>
+    <div class="pong-controls">
+      <p><span class="pong-key">↑</span><span class="pong-key">↓</span> or move your pointer</p>
+      <button id="pong-reset" type="button">Reset match</button>
     </div>
   </section>
 
@@ -83,15 +89,11 @@
 
 <footer class="site-footer">
   <div class="site-footer__inner">
-    <div class="site-footer__attrib">
-      <p>Written by Jason Rubenstein at Flybridge. Read the companion essay, <a href="https://www.flybridge.com/ideas/the-bow/agentic-file-systems" class="link-accent" target="_blank" rel="noopener">Agentic File Systems</a>, published on Flybridge's site.</p>
-    </div>
     <nav class="site-footer__nav">
-      <a href="index.html">Overview</a>
+      <a href="index.html">Home</a>
       <a href="continual-learning.html">Continual Learning</a>
       <a href="agentic-file-systems.html">Agentic File Systems</a>
     </nav>
-    <div class="site-footer__legal">Flybridge · Internal research, adapted for the web.</div>
   </div>
 </footer>
 

@@ -51,6 +51,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -72,7 +73,6 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
 img,
@@ -664,13 +664,9 @@ body.has-scrolled .scroll-cue {
 
 .timeline__stage {
   position: relative;
-  padding: 0.2rem 0 2.4rem 0;
+  padding: 0.2rem 0;
   opacity: 0.38;
   transition: opacity 0.6s var(--ease);
-}
-
-.timeline__stage:last-child {
-  padding-bottom: 0.2rem;
 }
 
 .timeline__stage.is-active {
@@ -696,19 +692,14 @@ body.has-scrolled .scroll-cue {
 }
 
 .timeline__stage-label {
-  position: sticky;
-  top: 84px;
-  z-index: 1;
-  display: inline-block;
+  display: block;
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--text-tertiary);
-  background: var(--bg);
-  transition: color 0.4s var(--ease);
+  transition: color 0.5s var(--ease);
   margin-bottom: 0.4em;
-  padding-bottom: 2px;
 }
 
 .timeline__stage.is-active .timeline__stage-label {
@@ -1879,6 +1870,10 @@ body.has-scrolled .scroll-cue {
   flex-wrap: wrap;
 }
 
+.site-footer__inner:not(:has(.site-footer__attrib)) {
+  justify-content: flex-end;
+}
+
 .site-footer__attrib p {
   font-size: 0.88rem;
   color: var(--text-tertiary);
@@ -1907,6 +1902,262 @@ body.has-scrolled .scroll-cue {
   border-top: 1px solid var(--border-soft);
   font-size: 0.78rem;
   color: var(--text-tertiary);
+}
+
+/* ==========================================================================
+   Home page and Pong
+   ========================================================================== */
+
+.pong-page {
+  min-height: 100vh;
+}
+
+.pong-page main {
+  min-height: calc(100vh - 72px);
+}
+
+.home-hero {
+  min-height: 82vh;
+  display: grid;
+  place-items: center;
+  padding: 7rem 1.5rem 3rem;
+  text-align: center;
+}
+
+.home-hero__inner {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.home-hero h1 {
+  white-space: nowrap;
+  font-size: clamp(1.05rem, 5vw, 4rem);
+  line-height: 1.05;
+}
+
+.home-scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-tertiary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.home-scroll-cue span {
+  color: var(--accent);
+}
+
+.home-writing {
+  padding: var(--space-6) 0;
+}
+
+.home-writing .section-title {
+  max-width: none;
+}
+
+.home-writing .thesis-links {
+  margin-top: var(--space-4);
+}
+
+.pong-shell {
+  width: min(100%, 1040px);
+  margin: 0 auto;
+  padding: var(--space-6) 1.5rem;
+}
+
+.pong-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: 1.4rem;
+}
+
+.pong-header .eyebrow {
+  margin-bottom: 0.35rem;
+}
+
+.pong-header h2 {
+  font-size: clamp(1.8rem, 4.4vw, 3.2rem);
+  line-height: 1.05;
+  max-width: 16ch;
+}
+
+.pong-score {
+  display: flex;
+  align-items: end;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.pong-score div {
+  display: grid;
+  justify-items: center;
+}
+
+.pong-score span {
+  color: var(--text-tertiary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.pong-score strong {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 500;
+  line-height: 0.9;
+}
+
+.pong-score .pong-score__divider {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.pong-game {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 20% 50%, rgba(219, 234, 172, 0.07), transparent 38%),
+    #0e100c;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+}
+
+#pong-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  touch-action: none;
+  outline: none;
+}
+
+#pong-canvas:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.pong-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
+  background: rgba(10, 11, 9, 0.58);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.pong-overlay.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pong-overlay p {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+.pong-button {
+  padding: 0.75rem 1.35rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text-on);
+  font-size: 0.86rem;
+  font-weight: 600;
+  transition: transform 0.2s var(--ease), background 0.2s ease;
+}
+
+.pong-button:hover {
+  background: var(--accent-strong);
+  transform: translateY(-2px);
+}
+
+.pong-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.pong-controls p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+}
+
+.pong-key {
+  display: inline-grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  margin-right: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.pong-controls button {
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+  border-bottom: 1px solid transparent;
+}
+
+.pong-controls button:hover {
+  color: var(--accent);
+  border-color: var(--accent-soft-2);
+}
+
+@media (max-width: 640px) {
+  .home-hero {
+    min-height: 72vh;
+    padding: 6rem 0.75rem 2rem;
+  }
+
+  .home-hero h1 {
+    font-size: clamp(1rem, 5.1vw, 1.35rem);
+  }
+
+  .home-writing {
+    padding: var(--space-5) 0;
+  }
+
+  .pong-shell {
+    padding: var(--space-5) 1rem;
+  }
+
+  .pong-header {
+    align-items: center;
+  }
+
+  .pong-header h2 {
+    max-width: 12ch;
+  }
+
+  .pong-game {
+    border-radius: 12px;
+  }
+
+  .pong-controls {
+    align-items: flex-start;
+  }
 }
 
 /* ==========================================================================

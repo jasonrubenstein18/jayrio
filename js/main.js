@@ -10,7 +10,7 @@
 
   function updateScrollProgress() {
     var doc = document.documentElement;
-    var scrollTop = window.scrollY || doc.scrollTop;
+    var scrollTop = Math.max(window.scrollY || 0, doc.scrollTop || 0, document.body.scrollTop || 0);
     var max = doc.scrollHeight - window.innerHeight;
     var pct = max > 0 ? Math.min(100, (scrollTop / max) * 100) : 0;
     if (progressBar) progressBar.style.width = pct + "%";
@@ -155,7 +155,11 @@
     var fill = timeline.querySelector(".timeline__spine-fill");
     if (!stages.length) return;
 
+    var activeIndex = -1;
+
     function setActive(index) {
+      if (index === activeIndex) return;
+      activeIndex = index;
       stages.forEach(function (stage, i) {
         stage.classList.toggle("is-active", i === index);
       });
@@ -165,24 +169,41 @@
       }
     }
 
-    if ("IntersectionObserver" in window) {
-      var observer = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-              var idx = stages.indexOf(entry.target);
-              if (idx !== -1) setActive(idx);
-            }
-          });
-        },
-        { threshold: 0.5, rootMargin: "-15% 0px -35% 0px" }
-      );
-      stages.forEach(function (stage) {
-        observer.observe(stage);
+    function updateActiveStage() {
+      var focusY = window.innerHeight * 0.38;
+      var bestIndex = 0;
+      var bestDistance = Infinity;
+
+      stages.forEach(function (stage, index) {
+        var rect = stage.getBoundingClientRect();
+        // Prefer the stage whose top edge is nearest the focus line, so short
+        // stages (like November 2025) still get a turn while scrolling.
+        var distance = Math.abs(rect.top - focusY);
+        if (rect.bottom > 80 && rect.top < window.innerHeight - 80 && distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
       });
+
+      setActive(bestIndex);
     }
 
-    setActive(0);
+    var timelineTicking = false;
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (timelineTicking) return;
+        timelineTicking = true;
+        requestAnimationFrame(function () {
+          updateActiveStage();
+          timelineTicking = false;
+        });
+      },
+      { passive: true }
+    );
+    window.addEventListener("resize", updateActiveStage);
+
+    updateActiveStage();
   });
 
   /* ------------------------------------------------------------------ */
@@ -376,5 +397,233 @@
     bars.forEach(function (bar) {
       bar.style.width = bar.getAttribute("data-value") + "%";
     });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Pong vs AI                                                         */
+  /* ------------------------------------------------------------------ */
+
+  var pongCanvas = document.getElementById("pong-canvas");
+  if (pongCanvas) {
+    var ctx = pongCanvas.getContext("2d");
+    var startButton = document.getElementById("pong-start");
+    var resetButton = document.getElementById("pong-reset");
+    var overlay = document.getElementById("pong-overlay");
+    var status = document.getElementById("pong-status");
+    var playerScoreEl = document.getElementById("pong-player-score");
+    var aiScoreEl = document.getElementById("pong-ai-score");
+    var width = pongCanvas.width;
+    var height = pongCanvas.height;
+    var winningScore = 7;
+    var running = false;
+    var serveDelay = 0;
+    var lastTime = performance.now();
+    var keys = { up: false, down: false };
+
+    var player = { x: 34, y: height / 2 - 46, w: 14, h: 92, score: 0 };
+    var ai = { x: width - 48, y: height / 2 - 46, w: 14, h: 92, score: 0 };
+    var ball = { x: width / 2, y: height / 2, r: 8, vx: 0, vy: 0 };
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function updateScore() {
+      playerScoreEl.textContent = player.score;
+      aiScoreEl.textContent = ai.score;
+    }
+
+    function resetBall(direction) {
+      ball.x = width / 2;
+      ball.y = height / 2;
+      var angle = (Math.random() * 0.8 - 0.4);
+      var speed = 860;
+      ball.vx = Math.cos(angle) * speed * direction;
+      ball.vy = Math.sin(angle) * speed;
+      serveDelay = 0.4;
+    }
+
+    function resetMatch() {
+      player.score = 0;
+      ai.score = 0;
+      player.y = height / 2 - player.h / 2;
+      ai.y = height / 2 - ai.h / 2;
+      running = false;
+      resetBall(Math.random() > 0.5 ? 1 : -1);
+      updateScore();
+      status.textContent = "First to 7 wins";
+      startButton.textContent = "Start game";
+      overlay.classList.remove("is-hidden");
+      draw();
+    }
+
+    function startGame() {
+      if (player.score >= winningScore || ai.score >= winningScore) {
+        player.score = 0;
+        ai.score = 0;
+        updateScore();
+        resetBall(Math.random() > 0.5 ? 1 : -1);
+      }
+      running = true;
+      overlay.classList.add("is-hidden");
+      pongCanvas.focus();
+    }
+
+    function finishGame(winner) {
+      running = false;
+      status.textContent = winner === "player" ? "You beat the AI." : "The AI wins. Rematch?";
+      startButton.textContent = "Play again";
+      overlay.classList.remove("is-hidden");
+    }
+
+    function scorePoint(side) {
+      if (side === "player") player.score += 1;
+      else ai.score += 1;
+      updateScore();
+
+      if (player.score >= winningScore) {
+        finishGame("player");
+      } else if (ai.score >= winningScore) {
+        finishGame("ai");
+      } else {
+        resetBall(side === "player" ? -1 : 1);
+      }
+    }
+
+    function paddleHit(paddle, isPlayer) {
+      var movingTowardPaddle = isPlayer ? ball.vx < 0 : ball.vx > 0;
+      var overlapsX = ball.x + ball.r >= paddle.x && ball.x - ball.r <= paddle.x + paddle.w;
+      var overlapsY = ball.y + ball.r >= paddle.y && ball.y - ball.r <= paddle.y + paddle.h;
+      if (!movingTowardPaddle || !overlapsX || !overlapsY) return;
+
+      var relativeHit = (ball.y - (paddle.y + paddle.h / 2)) / (paddle.h / 2);
+      var speed = Math.min(1520, Math.hypot(ball.vx, ball.vy) * 1.055);
+      var angle = relativeHit * 0.92;
+      ball.vx = Math.cos(angle) * speed * (isPlayer ? 1 : -1);
+      ball.vy = Math.sin(angle) * speed;
+      ball.x = isPlayer ? paddle.x + paddle.w + ball.r : paddle.x - ball.r;
+    }
+
+    function update(dt) {
+      if (!running) return;
+
+      var playerSpeed = 1120;
+      if (keys.up) player.y -= playerSpeed * dt;
+      if (keys.down) player.y += playerSpeed * dt;
+      player.y = clamp(player.y, 0, height - player.h);
+
+      var aiCenter = ai.y + ai.h / 2;
+      var trackingError = Math.sin(performance.now() / 650) * 22;
+      var aiTarget = ball.y + trackingError;
+      var aiSpeed = ball.vx > 0 ? 710 : 490;
+      ai.y += clamp(aiTarget - aiCenter, -aiSpeed * dt, aiSpeed * dt);
+      ai.y = clamp(ai.y, 0, height - ai.h);
+
+      if (serveDelay > 0) {
+        serveDelay -= dt;
+        return;
+      }
+
+      ball.x += ball.vx * dt;
+      ball.y += ball.vy * dt;
+
+      if (ball.y - ball.r <= 0) {
+        ball.y = ball.r;
+        ball.vy = Math.abs(ball.vy);
+      } else if (ball.y + ball.r >= height) {
+        ball.y = height - ball.r;
+        ball.vy = -Math.abs(ball.vy);
+      }
+
+      paddleHit(player, true);
+      paddleHit(ai, false);
+
+      if (ball.x + ball.r < 0) scorePoint("ai");
+      else if (ball.x - ball.r > width) scorePoint("player");
+    }
+
+    function drawCourt() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#0e100c";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([10, 14]);
+      ctx.beginPath();
+      ctx.moveTo(width / 2, 20);
+      ctx.lineTo(width / 2, height - 20);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = "rgba(219, 234, 172, 0.12)";
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, 72, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function draw() {
+      drawCourt();
+
+      ctx.fillStyle = "#dbeaac";
+      ctx.shadowColor = "rgba(219, 234, 172, 0.38)";
+      ctx.shadowBlur = 14;
+      ctx.fillRect(player.x, player.y, player.w, player.h);
+      ctx.fillRect(ai.x, ai.y, ai.w, ai.h);
+
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#f4f5ef";
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      if (running && serveDelay > 0) {
+        ctx.fillStyle = "rgba(244, 245, 239, 0.52)";
+        ctx.font = "600 13px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("GET READY", width / 2, height / 2 + 48);
+      }
+    }
+
+    function gameLoop(now) {
+      var dt = Math.min(0.033, (now - lastTime) / 1000);
+      lastTime = now;
+      update(dt);
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function movePlayerFromPointer(event) {
+      var rect = pongCanvas.getBoundingClientRect();
+      var pointerY = (event.clientY - rect.top) * (height / rect.height);
+      player.y = clamp(pointerY - player.h / 2, 0, height - player.h);
+    }
+
+    pongCanvas.addEventListener("pointermove", movePlayerFromPointer);
+    pongCanvas.addEventListener("pointerdown", function (event) {
+      movePlayerFromPointer(event);
+      if (!running) startGame();
+    });
+
+    window.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
+        keys.up = true;
+        event.preventDefault();
+      }
+      if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
+        keys.down = true;
+        event.preventDefault();
+      }
+    });
+
+    window.addEventListener("keyup", function (event) {
+      if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") keys.up = false;
+      if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") keys.down = false;
+    });
+
+    startButton.addEventListener("click", startGame);
+    resetButton.addEventListener("click", resetMatch);
+    resetMatch();
+    requestAnimationFrame(gameLoop);
   }
 })();
