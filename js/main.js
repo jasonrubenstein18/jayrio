@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /* Keep legacy .html entry points on their clean canonical URLs. */
+  if (window.history && window.history.replaceState && /\.html$/.test(window.location.pathname)) {
+    var cleanPath = window.location.pathname.replace(/(?:index)?\.html$/, "");
+    window.history.replaceState(null, "", (cleanPath || "/") + window.location.search + window.location.hash);
+  }
+
   /* ------------------------------------------------------------------ */
   /* Scroll progress + has-scrolled flag                                 */
   /* ------------------------------------------------------------------ */
