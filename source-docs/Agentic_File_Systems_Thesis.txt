@@ -1,0 +1,194 @@
+Agentic File Systems
+Thesis
+Filesystems are becoming the default interface agents use to store context, navigate work, and produce outputs. An agent native file system solves three problems that traditional file systems do not:
+
+1. Lets an agent manage its limited working context more effectively
+2. Produces an auditable record of every action autonomous agents take
+3. Makes mistakes recoverable through snapshots and branches
+
+Value will accrue to file systems built for specific kinds of work as the underlying storage remains a commodity similar to how basic cloud storage became a standard feature from hyperscalers.
+
+A general-purpose agent file system may emerge, the way LangChain and Vapi spread across verticals. To get there, a single standard would need to win individual developer mindshare (bottoms up) rather than sell into enterprise (top down). A file system in non-coding verticals is most likely to be absorbed as part of the workflow owner’s stack, for example Harvey/Legora in the legal space, Hebbia/Rogo in finance making it difficult for a standalone file system company to emerge. Therefore I believe the opportunity for a standalone file system startup is narrow, primarily existing in regulated verticals that have unique governance requirements and do not have vertical AI workflow owners today.
+
+Definition
+The way information is organized on a computer is within a series of files and folders, this is known as a file system and is the same as people see on their desktop. Computer programs are able to locate these files using its location then perform various operations such as open, read, write, etc. This is how every general purpose operating system (Windows, MacOS, Linux) is designed and AI agents trained on code written for such can easily traverse these patterns.
+
+An agent-native file system is a database the agent works with as if it were the ordinary file system above. The agent runs traditional file operations while the system adds controls underneath: older versions, an append-only log of agent actions, and governance over which files an agent can access and edit. This differs from memory layers such as Mem0 and Letta, which help an agent recall past interactions and user preferences across sessions. An agentic file system instead lets the agent produce, version-control, and govern its inputs and outputs. Sitting directly above the storage layers, file systems serve as an interface for agents to reach relevant files for the various tasks they perform autonomously. A file system startup would struggle to compete on storage. AWS S3 dominates on scale, and Wasabi leads on hot storage with pricing and reliability that are hard to undercut.
+
+Why Now
+	•	Training-data: The code leading models learn from is full of file operations, so agents handle files and folders fluently and behave predictably. 
+	•	Workload: Agents retrieve documents, synthesize information, and produce outputs without knowing upfront how the data should be organized. A filesystem lets them write freely as they go, while a database requires its structure defined in advance. Object storage behind the interface optimizes throughput and lets agents append reasoning logs before committing to production.
+	•	Interface convenience: Reaching a file takes only its path, while reaching a database takes addresses, passwords, and logins. Some of this convenience fades as production systems adopt stricter governance. The benefit holds because the restrictions attach to the file object itself, so agents stay programmatically aware of them. Agents then work faster and spend fewer tokens than they would searching external systems. 
+	•	Platform support from agent side: OpenAI’s Agents SDK now supports mounting a remote filesystem. By making the connection between agents and storage a native feature, the interface is already accessible to agents. When a distribution platform such as OpenAI builds the connection point natively, adoption of whatever plugs into it accelerates immediately.
+	•	Multi agent coordination: A single agent has little need for a live, shared-resource filesystem. The shift to orchestrator-subagent architectures creates real-time coordination challenges, where multiple agents writing to shared state cause conflicts, lost work, and non-reproducible outputs. 
+
+Unsolved Problems
+Core outstanding problems are:
+	•	Context management - Models have limited memory, and reading 100 files to finish a task strains an agent's ability to produce useful output. A file system lets agents organize information and pull only the relevant files. Today agents either re-read everything at each step or lean on the harness to manage retrieval, and both approaches spend the model's capacity on remembering rather than reasoning.
+	•	Auditability/Governance - Autonomous agents make consequential mistakes more often. A dedicated agent file system logs operations and tool calls so humans can review what happened and trace failures to their source. The log is auditable and append-only.
+	•	Reproducibility - As noted, agents will make errors. A file system gives users point-in-time snapshots and branches off historic versions so humans or sub-agents can work alongside agents. A human in the loop can rewind state to before an unwanted change and branch from that historic version, letting humans or sub-agents work alongside other agents.
+
+In regulated industries, and in most production systems, compliance departments should treat these as requirements for deploying agents with write access. Cloud execution platforms such as E2B, Daytona, Modal, and Runloop, along with platforms such as Claude Code, Cursor, and Codex, leave gaps that agentic file systems can close.
+
+Cloud execution platforms address memory through combinations of sandbox persistence, volumes, snapshots, and stateful operations (Appendix 1). Platforms such as Claude Code and Cursor preserve files through Git history, but working memory resets between sessions. Without frameworks built specifically for context retention these systems preserve agents' reasoning traces poorly.
+
+A common approach is to have agents maintain note files, an architecture summary, a list of gotchas, and a plan. Because agents write these notes as self-generated summaries, they can lose information and become stale as the project evolves. The notes are standalone documents, so nothing links a piece of reasoning to the specific version of the file it explains. They also cannot be queried, forcing agents to either read all of them or ignore them entirely in each session.
+
+For both single-agent progression and multi-agent coordination, future sessions need a unified graph-and-event-log architecture that attaches metadata directly to files and folders (Appendix 2).
+An agent cannot recover the reasoning behind past decisions or which alternatives it rejected. Git records what changed, but not always why. The opportunity is to store reasoning next to the artifact it explains, versioned together, retrieved together, so the next session starts from understanding rather than rebuilding.
+
+
+Interface vs Engine Framing
+I would not frame this as a filesystem versus database question. The agent sees a single directory and calls ls, read, and write while the backend routes to cloud or database stores and synthesizes the result, and the backend swaps from S3 to other options without touching the agent’s reasoning trace. This makes enterprise adoption simple and, as covered below, weakens the winner take all case by lending the market to workflow-specific winners.
+
+A database provides benefits that filesystems typically lack. Databases preserve old versions instead of overwriting them and avoid permanently destroying data through soft deletion. They also allow multiple agents to work concurrently without interfering with one another.
+
+Recreating these capabilities on top of a filesystem adds complexity when databases already provide them, while still enabling efficient querying. From the developer’s perspective, agents can output data in whatever structure suits the task without requiring a predefined schema. At the same time, a database-backed system can run structured queries across the full history of files, state, and tool calls.
+
+Schema-free writes and structured queries coexist in a single system, and file-level permissions allow access updates to limit agents to only the files they should modify.
+
+Turso AgentFS is an example of this. It keeps everything in one compact database file and exposes three things the agent needs: the files themselves as the output, a running log for roll back/visibility, and a scratchpad to track ongoing work. That single-file design is portable but does not hold up at large scale, which Turso is fixing by spreading storage across the cloud.
+
+Market Map
+Company
+(HQ)
+Year Funded
+Total Funding
+Web Traffic
+What it is
+View / Thoughts on Team
+Turso AgentFS
+
+(London, Canada)
+2021
+$7M
+337k (8%+)
+SQLite engine made to look like a file system interface. Keeps old versions rather than overwriting them, is available a portable file, and tracks the files, running log of what changes were made, and agent’s scratch notes
+Currently working to make this system scale to real company workloads. 
+
+Founders Glauber Costa and Pekka Enberg met at ScyllaDB (competitor to MongoDB) now have a team of 15 people
+Mesa
+
+(San Francisco, CA)
+2024
+N/A
+19k (147%)
+A file system that remembers every version of any kind of file, built for company document work that needs sign-offs and a clear record of who did what.
+Workflow-layer thesis aligned. The approvals and human-sign-off layer line up with Lightspeed's research on this category.
+
+Founders Oliver Gilan and Ben Warren met at Microsoft, a small team of 5 people with no funding yet
+Box
+
+(Redwood City, CA)
+2005
+$1.83B
+
+Established public company, offering the same folder-style access but wrapped in the security and compliance controls large companies already trust.
+Owns enterprise content and governance distribution. Hard to displace in the general case. Competes against startups on regulated verticals.
+Archil
+
+(San Francisco, CA)
+2024
+$18M
+11k (314%)
+Turns the cloud storage a company already has, such as Amazon S3, into a fast local folder agents can read and write without moving the data first.
+Removes the data-staging step and gives agents memory across runs, which is real infrastructure value, though it sits close to the raw storage that commoditizes. Strong on speed and no migration, lighter on the oversight and workflow depth
+
+Founder Hunter Leath previously went through YC and highly relevant past experience working in cloud storage systems for Netflix
+Mirage / Strukto
+
+(San Francisco, CA)
+
+https://github.com/strukto-ai/mirage 
+2026
+N/A
+
+Open-source unified virtual filesystem that mounts S3, Google Drive, Slack, GitHub, Redis, and a dozen other backends as a single folder tree. Agents interact with all of them via standard Unix bash tools
+Strong on developer ergonomics and interface unification. First public release was May 2026, 3100 GitHub stars. Governance depth is light, no audit logs, no append-only event log, no formal permissioning model, which limits fit for regulated verticals adoption.
+Sandbox platforms (E2B, Daytona, Modal, Vercel, Runloop)
+
+
+
+Temporary execution environments that spin up per run.
+They run the work but forget everything when they shut down. Some persistence layers have been built to fill this gap with each company taking slightly different approaches.
+Memory layers (Mem0, Letta, Zep)
+
+
+
+Tools that store and recall facts so an agent can look things up later.
+The alternate leading approach to capturing an agent's reasoning. Whether that reasoning should live here or inside the versioned file system is still an open question.
+ 
+Why it’s not a winner take all market
+Assessed against four pillars of a winner-take-all market, the space does not favor a single winner.
+•     Network effects are weak. One user’s usage does not benefit another. Heavy use does make it better for that one customer, but that locks the customer in rather than pulling new ones in.
+•     Switching costs can be argued both ways. Box, Mesa, and LangChain’s Deep Agents pattern argue the agent depends only on filesystem semantics, so the backend swaps without costly rewrites. A state that is portable by design makes the vendor a two-way implementation choice and weakens lock-in, while per-use accumulation of reasoning and memory runs the other way and compounds into stickiness.
+
+Different verticals value different features. Coding, research, analytics, and document-heavy regulated work each value version tracking, oversight, and file types differently, splitting the market into several specialized winners while the incumbents keep the generic, one-size-fits-all business.
+
+An argument against fragmentation is agent ergonomics. In the developer tools market, similar tools have ended up as winners or losers through small differences in the user interface that eventually lead to large differences in overall experience. The same will hold up for systems built for agents where variations in how a file system exposes information, errors, and historical changes will impact adoption rate. 
+
+Startup Opportunity to Win Share / Workflow Idiosyncracies
+There are common features that will be valuable across all verticals, and I consider these table stakes that will be copied by multiple competitors (notwithstanding the interface differences noted above). These features include version tracking, governance/permissioning, and consistent views across all concurrent agents that persist on all operations performed.
+
+A startup can defensibly go to market by building around one industry's way of working or by accumulating so much of a customer's reasoning and history that leaving becomes difficult.
+
+
+Vertical
+Differentiator
+Long term value
+Legal
+(contracts, litigation)
+Tracks specific document changes, keeping a record of who changed what, and controls who can see which documents by case and by legal confidentiality. Every version is kept and cannot be altered after the fact.
+Over time build a structured map of contract terms, obligations, and who agreed to them. iManage and NetDocuments already lead this market. Harvey, Legora, and peers may build a file system into their offering
+Healthcare 
+(clinical, imaging)
+Track who viewed a record, not just who edited it, because privacy law cares about who looked at patient data. Also stripping out identifying details everywhere necessary can be valuable here
+Build a privacy and consent model for each health system. A system built to track edits differs from one built to track views. 
+Financial services (trading, risk, audit)
+Financial records have to stay exact, be kept unchanged for years by law, and let you recreate what the data showed on any past date.
+Traceability is an asset, and it survives a swap of the underlying storage. Here regulators require it rather than customers preferring it. 
+Research
+Researchers naturally branch off in many directions and merge back the parts that work. Reproducing a result means bundling the data, code, setup, and settings together after frequent iteration which is challenging under current structures
+Build reusable records of how each result was reached
+Robotics and field operations
+Runs on the device in the field rather than in the cloud, responds fast when timing matters, records a heavy stream of sensor data, and re-syncs without conflicts after losing connection.
+The product is the syncing layer itself plus a stored map of work, a fundamentally different design from standalone document-tracking tools. 
+Coding and general analytics
+Standard version control for code, or standard querying for data.
+Whatever the system accumulates moves with the files, so nothing locks the customer in, and on the analytics side the established data-warehouse players already own it. Because the big AI labs and existing developer tools already reach these customers, I would hesitate on a standalone product here. Other abstractions such as entire.io capture the reasoning trace inside git workflows, and capturing attribution and authorship at the agent level delivers reproducibility that gains traction with developers, not just enterprise. 
+
+
+To expand on the coding and general analytics vertical, adoption here runs bottoms up, winning developer mindshare before expanding to enterprise agreements. In coding, entire.io is an open source project from former GitHub CEO Thomas Dohmke, backed by a $60M seed, that any developer can install to capture agent session history, track concurrent agents, and keep full version history native to git, with shared agent memory as its stated roadmap. The entire.io pipeline would be structurally difficult to carry into verticals such as legal, since contracts live in document management systems rather than repositories, the professionals there do not commit, and the audit regulators require covers who viewed a record and what the data showed on a given date, which git does not track. Meanwhile the core technology that is transferable from competitor to competitor is present here such as audit trails and ability to rewind changes.
+
+Of the companies noted above Mesa is one I am interested to learn more about as a pure play agentic file system infrastructure. Their focus on controls at the approvals and human-sign-off layer positions them to find a wedge in a workflow and its per-file version history with a record of who did what is a governance primitive that regulated industries would require. One question is what they’re thinking in terms of going to market, whether that’s as a horizontal layer across general document work or a vertical specific opportunity whether in healthcare, finance, etc. Second I would like to know on the technical side whether their system couples agent reasoning to versioned files rather than simply tracking files and aggregating a log of agent notes.
+
+Recommendation
+Evaluate the workflow layer across verticals. There is no single lead vertical given I expect several winners across coding, regulated document workflows in legal, health, and finance, research and analytics, and robotics and field operations, each rewarding a different filesystem profile. Coding is excluded for the reasons above. I’m interested to find companies where a team has committed to one vertical with legitimate governance requirements, accumulates per-user context that compounds, couples agent reasoning to the outputs in the same versioned read path, and stays backend-agnostic.
+
+In verticals with material regulations a file system can exist as a standalone company because the file system can be a system of record that other systems have to integrate with. Meanwhile there is a concurrent opportunity for vertical platforms to adopt file systems as part of their offerings and expand integrations with existing clients. For example, I would expect Harvey to build a file system offering for its law firm clients with features that I listed above.
+
+A general-purpose file system commoditizes and the hyperscalers and Box are more likely to win there. The pure coding-agent filesystem is a crowded space, where labs and harness vendors compete directly and platforms already own, or are trending to own, persistence across sessions. 
+
+
+What Could Change Things?
+A lab shipping a general-purpose agentic filesystem with native governance and reasoning capture is strong enough that vertical specialization stops mattering. Even with that in mind the labs have attempted to enter adjacent markets before and not won them, with specialized adjacent players maintaining a strong share. On the other hand the memory layer absorbing reasoning capture would be a negative development that structurally weakens the value proposition of the file system.
+
+As noted, the bull case for a general-purpose competitor is gaining share across industries at high velocity, then building derivative products that entrench value inside enterprises. A file system this low in the agent stack likely holds durability once enterprises adopt it, and the open variable is how fast a startup can gain share.
+
+
+
+Open Questions
+What is a company deploying agents willing to pay for an agentic native file system? Which underlying design wins for which kind of work and which size of company? Current guess is lightweight single-file designs fit early-stage and smaller use, while large enterprises need storage spread across the cloud. And does reasoning capture belong in the filesystem or in a separate memory tool? Is there an opportunity for a single company to move quickly and offer a wide variety of feature options that can be applied across verticals?
+Appendix 1: Execution Environment Persistence Concepts
+Sandbox Persistence - Sandboxes are isolated environments where code runs. By default they wipe clean on shutdown. Sandbox persistence means the state survives between runs so an agent picks up where it left off.
+Volumes - Storage attached to a running environment that survives restarts and can be moved between environments. An external hard drive that different machines can plug into without losing data.
+Snapshots - A read-only copy of an environment's full state at a point in time. If something breaks, the system reverts to the snapshot.
+Stateful Operations - Operations where the result depends on prior context. A stateful agent knows what it has already read, decided, and written within a session.
+Appendix 2: Graph-and-Event-Log Architecture
+Every file is a node, every relationship between files is a typed edge, and every agent action is an entry in an append-only event log with the reasoning attached.
+Nodes represent files and folders. Edges capture relationships: CONTAINS, DERIVED_FROM, REFERENCES.
+Each event log entry records:
+	•	What operation was performed and on which file version
+	•	Why the agent made that choice
+	•	What alternatives it rejected
+	•	What prior event triggered it

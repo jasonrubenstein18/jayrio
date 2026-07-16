@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Continual Learning — Flybridge Investment Thesis</title>
+<meta name="description" content="Continual learning ranks among the hardest unsolved problems in AI and gates the path to recursive self improvement. A Flybridge investment thesis on parametric modification, memory layers, and neuromorphic hardware." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<nav class="site-nav">
+  <div class="site-nav__inner">
+    <a href="index.html" class="site-nav__brand">Flybridge <span>Theses</span></a>
+    <button class="site-nav__toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="site-nav__links">
+      <a href="index.html">Overview</a>
+      <a href="continual-learning.html" class="is-active">Continual Learning</a>
+      <a href="agentic-file-systems.html">Agentic File Systems</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container container--wide">
+      <span class="eyebrow reveal">Flybridge Investment Thesis · 01</span>
+      <h1 class="word-reveal">Continual Learning</h1>
+      <p class="lede hero__lede reveal">Continual learning ranks among the hardest unsolved problems in AI research. It is a primary bottleneck on the path to recursive self improvement.</p>
+      <div class="hero__meta reveal">
+        <span>Jason Rubenstein</span>
+        <span class="dot"></span>
+        <span>Flybridge</span>
+      </div>
+      <div class="scroll-cue" aria-hidden="true">
+        <div class="scroll-cue__line"></div>
+        <span>Scroll</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Overview -->
+  <section class="section--tight">
+    <div class="container reveal">
+      <p class="body-text">Continual learning is the ability of a model to adapt to new, changing data while it keeps what it already knows. Real world data shifts on its own schedule. A customer service tool has to learn new company policy. A recommendation system has to track a user's changing taste. Without continual learning, a model loses accuracy as its environment moves past it.</p>
+      <p class="body-text">Leading startups in this space raised more than $150 million in the last three months. The biggest beneficiaries will be companies that own unique inference data and workflows. Cursor is one proof point, turning its own inference data into training signal for real time reinforcement learning.</p>
+      <p class="body-text">Capturing that opportunity takes thousands of GPUs, interconnect systems, enough memory to hold weights and computation, and a team of highly paid researchers. Most workflow owners hold the data but not that infrastructure, which opens room for standalone continual learning startups to fill the gap. The clearest opportunity, in my view, sits with three companies: Prime Intellect, Engram, and Trajectory, each helping workflow owners build their own models on an open weight base.</p>
+    </div>
+  </section>
+
+  <!-- Dial explainer -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">How training works</span>
+      <h2 class="section-title">Billions of dials, frozen at ship time</h2>
+      <p class="section-kicker">Every weight in a model is a dial set during training. The model sees an example, guesses, and nudges the relevant dials toward a better guess. Once training ends, the dials lock. Drag the control to see what changes when a model keeps learning after it ships.</p>
+    </div>
+
+    <div class="dial-explainer container container--wide reveal">
+      <div class="dial-panel">
+        <div class="dial-grid" aria-hidden="true">
+          <span class="dial"></span><span class="dial"></span><span class="dial"></span><span class="dial"></span>
+          <span class="dial"></span><span class="dial"></span><span class="dial"></span><span class="dial"></span>
+          <span class="dial"></span><span class="dial"></span><span class="dial"></span><span class="dial"></span>
+          <span class="dial"></span><span class="dial"></span><span class="dial"></span><span class="dial"></span>
+          <span class="dial"></span><span class="dial"></span><span class="dial"></span><span class="dial"></span>
+          <span class="dial"></span><span class="dial"></span><span class="dial"></span><span class="dial"></span>
+        </div>
+        <div class="dial-slider-row">
+          <span class="dial-slider-label">Frozen model</span>
+          <input type="range" min="0" max="100" value="0" aria-label="Slide to compare a frozen model with continual learning">
+          <span class="dial-slider-label end">Continual learning</span>
+        </div>
+        <div class="dial-copy">
+          <p class="state-frozen">Training nudges billions of weights until the model's guesses match reality. When training stops, every dial locks in place. The model answers only from what it learned before that moment, no matter how the world changes after.</p>
+          <p class="state-live">Continual learning keeps nudging the dials after ship day. New data updates the same weights, so the model absorbs fresh facts and feedback without a full retrain. New nudges can also disturb the settings that held old knowledge, so the model forgets what it knew.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pull quote 1 -->
+  <section class="section--tight">
+    <div class="container pull-quote reveal">
+      <p class="word-reveal">Turning the dials to learn something new disturbs the settings that held old knowledge. The model can forget what it knew.</p>
+      <cite>From the thesis</cite>
+    </div>
+  </section>
+
+  <!-- Three approaches -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Three approaches</span>
+      <h2 class="section-title">Three ways to keep a model current</h2>
+      <p class="section-kicker">Startups attacking continual learning split into three camps. Each pushes the cost of staying current to a different place in the stack.</p>
+    </div>
+
+    <div class="tabs container container--wide reveal">
+      <div class="tabs__list" role="tablist">
+        <button class="tabs__btn is-active" data-tab="parametric" role="tab" aria-selected="true">Parametric modification</button>
+        <button class="tabs__btn" data-tab="memory" role="tab" aria-selected="false">Non-parametric memory</button>
+        <button class="tabs__btn" data-tab="hardware" role="tab" aria-selected="false">Neuromorphic hardware</button>
+      </div>
+
+      <div class="tabs__panel is-active" data-tab-panel="parametric">
+        <div class="tabs__panel-grid">
+          <div>
+            <p class="body-text">Parametric modification changes a model's own weights after it ships. The update lives in the weights, so the model carries the new behavior everywhere it runs, with no reminder needed at query time.</p>
+            <p class="body-text">The trade-off is cost. Editing weights without disturbing old knowledge is slow, expensive, and the core problem every company in this camp is solving.</p>
+            <p class="body-text">Standalone companies here face a structural choice. Build on an open weight model such as Kimi, DeepSeek, or GLM, and value tends to accrue back to the open source lab. Partner closely with a closed weight lab such as OpenAI, Anthropic, or DeepMind, and the more likely outcome is an eventual acquihire.</p>
+          </div>
+          <dl class="tradeoff-card">
+            <h4>Where it lands</h4>
+            <div class="tradeoff-row"><dt>Cost lands in</dt><dd>Training compute</dd></div>
+            <div class="tradeoff-row"><dt>Training vs inference</dt><dd>Training heavy</dd></div>
+            <div class="tradeoff-row"><dt>Maturity</dt><dd>Early, venture scale race</dd></div>
+            <div class="tradeoff-row"><dt>Example companies</dt><dd>Prime Intellect, Engram, Trajectory</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="tabs__panel" data-tab-panel="memory">
+        <div class="tabs__panel-grid">
+          <div>
+            <p class="body-text">These startups treat memory as retrieval, not as a weight update. The model's weights stay frozen. A separate store of working memory updates instead, and the model pulls from it at query time.</p>
+            <p class="body-text">Memory complements continual learning rather than replacing it. Flybridge's own research on this space found differentiation hard to sustain. Most players get mixed feedback from users, and many have shifted their pitch toward caching and cost savings instead of a better product experience.</p>
+            <p class="body-text">Foundation model providers see user memory as a lever for switching costs. That makes this category harder for a standalone startup to defend.</p>
+          </div>
+          <dl class="tradeoff-card">
+            <h4>Where it lands</h4>
+            <div class="tradeoff-row"><dt>Cost lands in</dt><dd>Inference, per query</dd></div>
+            <div class="tradeoff-row"><dt>Training vs inference</dt><dd>Inference heavy</dd></div>
+            <div class="tradeoff-row"><dt>Maturity</dt><dd>Crowded, weak differentiation</dd></div>
+            <div class="tradeoff-row"><dt>Example companies</dt><dd>Mem0, Letta, Zep</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="tabs__panel" data-tab-panel="hardware">
+        <div class="tabs__panel-grid">
+          <div>
+            <p class="body-text">This camp updates the physical processor. Instead of shuttling data between separate compute and memory, these chips store a weight and compute with it in the same physical spot, closer to how a brain works.<sup class="fn-ref" data-fn="fn2">2</sup></p>
+            <p class="body-text">The rationale starts with biology. A human brain learns for life, holds decades of memory, and runs on about twenty watts. A frontier model burns far more energy and still forgets easily. Proponents argue the chip itself, not only the algorithm, is part of the problem.</p>
+            <p class="body-text">Unconventional AI looks the most relevant name in this group. Founder Naveen Rao co-founded MosaicML, later acquired by Databricks. His claim is that an analog chip can behave like the math a model needs to run, rather than simulate that math step by step through transistors.</p>
+          </div>
+          <dl class="tradeoff-card">
+            <h4>Where it lands</h4>
+            <div class="tradeoff-row"><dt>Cost lands in</dt><dd>Chip fabrication, R&amp;D</dd></div>
+            <div class="tradeoff-row"><dt>Training vs inference</dt><dd>Neither yet, cost sits in design</dd></div>
+            <div class="tradeoff-row"><dt>Maturity</dt><dd>Early, research and prototype</dd></div>
+            <div class="tradeoff-row"><dt>Example companies</dt><dd>Unconventional AI, Extropic</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Common misconceptions -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Common misconceptions</span>
+      <h2 class="section-title">Two ideas people get wrong</h2>
+    </div>
+
+    <div class="accordion container container--wide reveal">
+      <div class="accordion__item">
+        <button class="accordion__trigger" aria-expanded="false">
+          Weight updates and retrieval cost the same
+          <span class="plus"></span>
+        </button>
+        <div class="accordion__panel">
+          <div class="accordion__panel-inner">
+            <p>They sit at opposite ends of cost and speed. A weight update is a training run, and its cost scales with how often and how many models get updated. Retrieval is fast and adds little beyond the tokens it pulls in.</p>
+            <p>Even where a weight update makes sense, most systems still want a retrieval layer too. Facts pulled from an external store can be cited, audited, and edited cheaply. Facts baked into weights cannot.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion__item">
+        <button class="accordion__trigger" aria-expanded="false">
+          Continual learning alone delivers recursive self improvement
+          <span class="plus"></span>
+        </button>
+        <div class="accordion__panel">
+          <div class="accordion__panel-inner">
+            <p>A model that cannot take in new information will never improve itself, so continual learning is a precondition. It is not the hard part.</p>
+            <p>The harder capability is judgment. That means choosing what to learn, what to discard, and where to push next. A model can update its weights all day and still choose bad problems. Continual learning clears one barrier to recursive self improvement. It does not deliver it in full.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compute implications -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Compute implications</span>
+      <h2 class="section-title">Where the cost lands</h2>
+      <p class="section-kicker">The two leading approaches push spending to different parts of the stack.</p>
+    </div>
+
+    <div class="viz-block reveal">
+      <div class="cost-flow">
+        <div class="cost-flow__card">
+          <h4>Parametric pushes cost into training</h4>
+          <div class="cost-flow__bar">
+            <div class="cost-flow__seg cost-flow__seg--train" data-value="76">Training</div>
+            <div class="cost-flow__seg cost-flow__seg--infer" data-value="24">Inference</div>
+          </div>
+          <p class="mt-2" style="font-size: 0.92rem; margin-bottom: 0;">Every weight update is a training run. The more often a model relearns, and the more models a provider keeps current, the higher the standing compute bill. The spending flows to compute providers and to whoever owns the update pipeline.</p>
+        </div>
+        <div class="cost-flow__card cost-flow__card--memory">
+          <h4>Memory pushes cost into inference</h4>
+          <div class="cost-flow__bar">
+            <div class="cost-flow__seg cost-flow__seg--train" data-value="24">Training</div>
+            <div class="cost-flow__seg cost-flow__seg--infer" data-value="76">Inference</div>
+          </div>
+          <p class="mt-2" style="font-size: 0.92rem; margin-bottom: 0;">Freezing the weights avoids the retraining bill, but the cost returns at run time. Every call retrieves context and feeds it back through the model, burning tokens per request. The spending lands on inference providers and on memory tooling instead.</p>
+        </div>
+      </div>
+      <p class="viz-caption"><strong>How to read this.</strong> The bars show where each approach concentrates spending, not a measured split. Neither source document gives an exact ratio between training and inference cost.</p>
+    </div>
+  </section>
+
+  <!-- Pull quote 2 -->
+  <section class="section--tight">
+    <div class="container pull-quote reveal">
+      <p class="word-reveal">If every startup in this space converges on one approach, the leading labs capture the value. Everyone else exits through acquihire.</p>
+      <cite>From the thesis</cite>
+    </div>
+  </section>
+
+  <!-- RSI timeline -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">A leading indicator</span>
+      <h2 class="section-title">Recursive self improvement, in one timeline</h2>
+      <p class="section-kicker">Continual learning is necessary for a system to improve itself. It is not sufficient on its own. Anthropic's own numbers, from its June 2026 piece "When AI Builds Itself," show how fast the easier part is moving.</p>
+    </div>
+
+    <div class="timeline container container--wide reveal">
+      <div class="timeline__spine">
+        <div class="timeline__spine-track"></div>
+        <div class="timeline__spine-fill"></div>
+      </div>
+      <div class="timeline__stages">
+        <div class="timeline__stage">
+          <span class="timeline__dot"></span>
+          <span class="timeline__stage-label">Before 2025</span>
+          <h3>Claude writes almost none of Anthropic's code</h3>
+          <p>Claude's share of code merged into Anthropic's own codebase sits in the low single digits.</p>
+        </div>
+        <div class="timeline__stage">
+          <span class="timeline__dot"></span>
+          <span class="timeline__stage-label">November 2025</span>
+          <h3>Best model beats the human call about half the time</h3>
+          <p>On a test where models pick the next step in a real experiment, Anthropic's best model matches or beats the human choice 51 percent of the time.</p>
+        </div>
+        <div class="timeline__stage">
+          <span class="timeline__dot"></span>
+          <span class="timeline__stage-label">April 2026</span>
+          <h3>That figure climbs to 64 percent</h3>
+          <p>Four months later, the same benchmark puts the model's win rate against the human choice at 64 percent.</p>
+        </div>
+        <div class="timeline__stage">
+          <span class="timeline__dot"></span>
+          <span class="timeline__stage-label">May 2026</span>
+          <h3>Claude writes most of the code</h3>
+          <p>More than 80 percent of the code merged into Anthropic's codebase is authored by Claude, and the typical engineer ships eight times as much code per day as in 2024.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="viz-block reveal mt-4">
+      <div class="bar-compare">
+        <div class="bar-row">
+          <span class="bar-row__label">Nov 2025</span>
+          <div class="bar-row__track">
+            <div class="bar-row__fill" data-value="51" style="width: 0%;"><span>51%</span></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-row__label">Apr 2026</span>
+          <div class="bar-row__track">
+            <div class="bar-row__fill" data-value="64" style="width: 0%;"><span>64%</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="viz-caption"><strong>How to read this.</strong> Anthropic tested moments where a researcher's next step had room to improve, then had a separate model judge whether the AI's suggested step or the human's actual choice worked out better. The figures above show how often the AI's suggestion won that judgment.</p>
+    </div>
+
+    <div class="container container--wide reveal mt-4">
+      <p class="body-text">None of this means recursive self improvement has arrived. Anthropic says plainly that it has not, and that it is not inevitable. The capability still missing is judgment, the same gap flagged above. Continual learning is worth tracking as a leading indicator toward that gap closing, not as proof that it has closed.</p>
+    </div>
+  </section>
+
+  <!-- Company guide -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Company guide</span>
+      <h2 class="section-title">Who is building this</h2>
+      <p class="section-kicker">Grouped by approach. This is not the first generation of continuous training platforms. Predibase and Lamini pursued continuous fine-tuning years earlier, and each was acquihired once adoption stalled.<sup class="fn-ref" data-fn="fn1">1</sup> The trend toward open source, post-trained models has widened the opening for a similar pitch to land this time. Cards marked <strong>core opportunity</strong> below are the group's clearest bet, in my view: workflow owners who need help building their own models on an open weight base.</p>
+    </div>
+
+    <!-- Parametric group -->
+    <div class="company-group reveal">
+      <div class="group-heading">
+        <h3>Parametric modification</h3>
+        <p>Update the weights directly</p>
+      </div>
+      <div class="card-grid">
+
+        <div class="company-card is-featured">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top">
+              <h3 class="card-title">Prime Intellect</h3>
+              <span class="company-card__tag">Core opportunity</span>
+            </div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2023</span><span>$200M raised</span><span>116k traffic</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Open stack and distributed framework, prime-rl, that evolves model weights using asynchronous reinforcement learning. The platform connects agent evals to improvement loops and runs post-training at massive scale.</p>
+              <p class="company-card__example">A coding agent fails a class of unit tests. Many machines run improvement loops at once, score the attempts, and push weight updates back to the shared model.</p>
+              <p class="company-card__founders">Founders: Vincent Weisser, Johannes Hagemann</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card is-featured">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top">
+              <h3 class="card-title">Engram</h3>
+              <span class="company-card__tag">Core opportunity</span>
+            </div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2025</span><span>$98M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Builds a learned memory layer that folds an organization's corpus directly into model weights, so the model answers from internalized memory. Claims up to 100x fewer tokens at frontier-comparable quality.</p>
+              <p class="company-card__example">A Notion or Harvey agent that would otherwise re-read the same workspace on every call carries that knowledge in-weight, matching frontier output while spending a fraction of the tokens.</p>
+              <p class="company-card__founders">Founders: Dan Biderman, Sabri Eyuboglu, Jessy Lin, Jack Morris, Scott Linderman, Chris Ré</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card is-featured">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top">
+              <h3 class="card-title">Trajectory</h3>
+              <span class="company-card__tag">Core opportunity</span>
+            </div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2025</span><span>$15M raised</span><span>19k traffic</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Continuous learning platform that turns usage logs into reinforcement learning feedback, updating model weights from failure and success data.</p>
+              <p class="company-card__example">A support bot keeps misrouting refund tickets. Those logged failures become reward signal, and the weights update so it routes them correctly on the next batch.</p>
+              <p class="company-card__founders">Founders: Ronak Malde, Michael Elabde, Arjun Karanam</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Relai</h3></div>
+            <div class="company-card__meta"><span>Bethesda, MD</span><span>2024</span><span>$6.9M raised</span><span>8.4k traffic</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Verifiable continuous learning platform that intercepts agentic workflow failures and user feedback loops.</p>
+              <p class="company-card__example">An agent keeps booking the wrong meeting room. Relai catches the failure and the user correction, verifies the fix, then folds it into the model.</p>
+              <p class="company-card__founders">Founder: Soheil Feizi</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Inference.net</h3></div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2022</span><span>$12.3M raised</span><span>68k traffic</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Runs a full lifecycle platform, Catalyst, that captures production traffic and eval failures, turns them into training data, then fine-tunes and hosts task-specific custom models.</p>
+              <p class="company-card__example">A team runs a cheap custom model to tag support emails. As new ticket types show up, fresh production data retrains the model to keep pace.</p>
+              <p class="company-card__founders">Founders: Francesco Virga, Ibrahim Ahmed, Amarjot Singh</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Activeloop</h3></div>
+            <div class="company-card__meta"><span>Mountain View, CA</span><span>2018</span><span>$20M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Develops deep-tech database infrastructure built to feed continuous streaming loops directly into model weights.</p>
+              <p class="company-card__example">A vision model misses a new product on the shelf. New labeled images stream from the database into the next training pass.</p>
+              <p class="company-card__founders">Founder: Davit Buniatyan</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Savante</h3></div>
+            <div class="company-card__meta"><span>Founded 2023</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Trains custom specialist models for a customer's domain by RL post-training an open model against that customer's data, evaluations, and expert judgment.</p>
+              <p class="company-card__example">A 7B open model RL post-trained for JEE math went from 54.7% to 90.2% accuracy, beating o4-mini and Gemini 2.5 Flash.</p>
+              <p class="company-card__founders">Founders: Sachin Dharashivkar, Rohith Pesala</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Memory group -->
+    <div class="company-group reveal">
+      <div class="group-heading">
+        <h3>Non-parametric memory</h3>
+        <p>Frozen weights, updated working memory</p>
+      </div>
+      <div class="card-grid">
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Lemma</h3></div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2025</span><span>$500k (YC)</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Acts as a continuous learning engine by programmatically generating prompt fixes that repair behavioral drift instantly, with no weight change.</p>
+              <p class="company-card__example">After a model change, an agent starts greeting users too casually. Lemma spots the drift and writes a prompt patch that corrects it.</p>
+              <p class="company-card__founders">Founders: Jerry Zhang, Cole Gawin</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Zep</h3></div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2023</span><span>$2.3M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Extracts, enriches, and structures dialogue histories continuously into an accessible graph layer that persists across sessions.</p>
+              <p class="company-card__example">A user mentions a peanut allergy in chat. Zep pulls that fact into a graph so the assistant recalls it in later sessions.</p>
+              <p class="company-card__founders">Founder: Daniel Chalef</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Mem0</h3></div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2023</span><span>$23.9M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Creates an intelligent, self-improving long-term memory layer for AI applications that adapts based on user interactions.</p>
+              <p class="company-card__example">A user says they prefer aisle seats. Mem0 stores the preference and surfaces it the next time they book a flight.</p>
+              <p class="company-card__founders">Founders: Deshraj Yadav, Taranjeet Singh</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Letta</h3></div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2024</span><span>$10M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Enables agents to manage, compress, and read-write to their own persistent storage subsystems.</p>
+              <p class="company-card__example">An agent runs low on context mid task. Letta lets it write notes to its own store and read them back later, like a working notebook.</p>
+              <p class="company-card__founders">Founders: Charles Packer, Sarah Wooders</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Langfuse</h3></div>
+            <div class="company-card__meta"><span>Berlin / San Francisco</span><span>2022</span><span>$4M, acquired</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Open-source AI engineering and evaluation tracing loops that let development teams monitor agent drift.</p>
+              <p class="company-card__example">A team notices answers getting worse. Langfuse traces each agent step so they can see where the drift began and fix the prompt or tool.</p>
+              <p class="company-card__founders">Founders: Marc Klingen, Max Deichmann, Clemens Rawert</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Hardware group -->
+    <div class="company-group reveal">
+      <div class="group-heading">
+        <h3>Neuromorphic hardware</h3>
+        <p>Update the physical processor</p>
+      </div>
+      <div class="card-grid">
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Unconventional AI</h3></div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2025</span><span>$475M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Rethinking the foundations of the computer to optimize energy efficiency for AI, building silicon circuits with non-linear dynamics similar to biological intelligence.</p>
+              <p class="company-card__founders">Founders: Naveen Rao, Michael Carbin, Sara Achour, MeeLan Lee</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Cortical Labs</h3></div>
+            <div class="company-card__meta"><span>Melbourne, AU</span><span>2019</span><span>$11.7M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Its biological arrays lean on natural cell plasticity to continuously learn and process workloads at near-zero power.</p>
+              <p class="company-card__founders">Founder: Hon Weng Chong</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Koniku</h3></div>
+            <div class="company-card__meta"><span>San Francisco, CA</span><span>2023</span><span>$49.3M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Computing processors that integrate synthetic biological cells onto physical chips rather than using traditional transistor circuits.</p>
+              <p class="company-card__founders">Founder: Oshiorenoya Agabi</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Innatera</h3></div>
+            <div class="company-card__meta"><span>Netherlands</span><span>2018</span><span>$32.2M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Develops ultra-low-power neuromorphic processors built for sensor data and edge computing applications.</p>
+              <p class="company-card__founders">Founder: Sumeet Kumar</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-card">
+          <button class="company-card__head" aria-expanded="false">
+            <div class="company-card__top"><h3 class="card-title">Extropic</h3></div>
+            <div class="company-card__meta"><span>Austin, TX</span><span>2022</span><span>$14.1M raised</span></div>
+            <span class="company-card__chevron"></span>
+          </button>
+          <div class="company-card__body">
+            <div class="company-card__body-inner">
+              <p>Builds thermodynamic sampling units, pbits, that use thermal noise for probabilistic AI at a fraction of the energy.</p>
+              <p class="company-card__founders">Founders: Guillaume Verdon, Trevor McCourt</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions for founders -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Diligence</span>
+      <h2 class="section-title">What to ask a founding team</h2>
+      <p class="section-kicker">Founders of the earlier fine-tuning wave share traits worth pattern-matching today.<sup class="fn-ref" data-fn="fn3">3</sup> Two sets of questions worth asking before writing a check follow below.</p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div class="callout">
+        <h4>On team composition</h4>
+        <ul>
+          <li>Who owns the research, and who owns the engineering? Are they the same person?</li>
+          <li>Who on the team has built large-scale training or high-traffic serving systems before, and where?</li>
+          <li>Has anyone on the team shipped something to real users at scale, or is this the first time?</li>
+          <li>What gap in the team are you hiring for next?</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <h4>On priority and readiness</h4>
+        <ul>
+          <li>Data scarcity. Are you generating high-quality, workflow-specific data that would be hard for others to replicate?</li>
+          <li>Model agnosticism risk. If your product sits on top of leading foundation models with no proprietary learning loop, does that create real competitive risk?</li>
+          <li>Ability to act on the data. Are you capitalized well enough to attract strong AI engineers and fund the compute this takes, or does a distributed RL partner make more sense?</li>
+          <li>Stage and timing. Is the company mature enough that this should be a priority now, rather than a capability worth revisiting later?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Conclusion -->
+  <section class="section section-border">
+    <div class="container reveal">
+      <span class="eyebrow">Where we land</span>
+      <h2 class="section-title">Flybridge's take</h2>
+      <p class="body-text">Prime Intellect stands out most among this group. It serves as the primary infrastructure layer for neolabs such as Ricursive and Arcee, providing compute, managed training, inference, and research tooling. Reinforcement learning workloads drive most of its revenue, post-training is its fastest growing line, and on-demand GPU rental stays under ten percent of revenue. The team treats continual learning as a north star, and it has driven production wins including Cursor's Tab model and now Composer.</p>
+      <p class="body-text">This space is hard for Flybridge to enter today. Many leading teams sit in San Francisco with seed rounds already valued above a billion dollars, and an ownership stake at that price falls below Flybridge's usual target for a first check. The capital requirement follows from founder pedigree, standing compute costs, and the trial and error every team runs across training and inference. The revenue opportunity is large enough to justify the price.</p>
+      <p class="body-text">A useful diligence signal is a founder's published research. Engram co-founder Jessy Lin published a <a href="https://arxiv.org/pdf/2510.15103" class="link-accent" target="_blank" rel="noopener">relevant paper</a> during her PhD at Berkeley. Work like that points to a company's likely research direction, and diligence should test whether that direction is differentiated and whether it can scale past a proof of concept.</p>
+      <p class="body-text">If every startup in this space converges on one approach, the leading labs, Anthropic, OpenAI, Google, capture most of the value, and outside teams tend to exit through acquihire. The opportunities that last are adaptive systems built around a specific workflow. Think personalization, real time threat detection, or recommendation systems that shift with behavior. Engram's work with Notion and Harvey is an early version of this pattern.</p>
+      <p class="body-text">Two revenue paths look credible to me. One is enterprise specific models updated on a rolling basis, so each company runs a model trained on its own workers and workflows. The other is a foundation model of its own for any team that builds real user traction, priced at a premium today. I would want to speak with founders across this space to test these views further.</p>
+    </div>
+  </section>
+
+  <!-- Footnotes -->
+  <section class="section--tight">
+    <div class="container footnotes reveal">
+      <h2>Footnotes</h2>
+      <ol>
+        <li id="fn1"><span>Predibase and Lamini were the continuous fine-tuning platforms of the previous wave. Predibase was acquihired by Rubrik and Lamini by AMD, after fine-tuning took longer than expected to find adoption.</span></li>
+        <li id="fn2"><span>A memristor is a circuit element whose resistance changes with the current that has passed through it, and it keeps that value even when the power is off. Because the value lives in the device, a grid of memristors can store weights and compute with them in the same spot.</span></li>
+        <li id="fn3"><span>Predibase founders Piero Molino, Travis Addair, and Devvret Rishi, and Lamini founders Sharon Zhou and Greg Diamos, had experience scaling frameworks such as Horovod and Ludwig and doing hardware-software co-design. That background let them solve data routing and memory problems that block a product at scale, beyond a research proof of concept.</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__attrib">
+      <p>Written by Jason Rubenstein at Flybridge. Read the companion essay, <a href="https://www.flybridge.com/ideas/the-bow/agentic-file-systems" class="link-accent" target="_blank" rel="noopener">Agentic File Systems</a>, published on Flybridge's site.</p>
+    </div>
+    <nav class="site-footer__nav">
+      <a href="index.html">Overview</a>
+      <a href="continual-learning.html">Continual Learning</a>
+      <a href="agentic-file-systems.html">Agentic File Systems</a>
+    </nav>
+    <div class="site-footer__legal">Flybridge · Internal research, adapted for the web.</div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

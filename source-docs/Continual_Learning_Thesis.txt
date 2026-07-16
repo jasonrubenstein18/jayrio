@@ -1,0 +1,306 @@
+Continual Learning
+
+Overview
+
+Continual learning ranks among the top unsolved problems in AI research. As frontier labs and startups race to automate research and reach recursive self improvement, it stands as a primary bottleneck. Some of the leading startups in the space have raised over $150M in the last 3 months.  Continual learning is the ability of a model to adapt to new, changing data over time while keeping what it already knows. This matters because real-world data distributions keep shifting. A customer service tool must learn new company policies. A recommendation system must track changing user preferences. Without continual learning, models lose accuracy as their environment changes. Ultimately the biggest beneficiaries of continual learning will be companies that own unique inference data/workflows There is evidence of companies, like Cursor, who have turned inference data into valuable training signals for real time RL. In order to fully capture this opportunity a workflow owner would need to have access to thousands of GPUs, interconnect systems, and significant amounts of memory to hold weights and computations, not to mention dozens of extremely talented (very highly paid) researchers. Other leading workflow owners have similar access to unique inference data, but lack the ability to train their own models which creates opportunities for standalone continual learning startups to fill that gap. I believe the biggest opportunities exist for these companies, namely Prime Intellect, Engram, and Trajectory, who will assist leading workflow owners in building their own models on top of open weight bases. This is in addition to companies who own unique, difficult to replicate, inference data that can be leveraged to create workflow specific models - leading to a durable competitive advantage via underlying model performance.
+
+Modern AI models consist of many artificial neurons (the dot product of an input vector x and a learned weight vector w) that together compose neural networks. Every connection between neurons has a specific weight attached. It helps to picture the weights as billions of dials. Training is the process of setting those dials to specific values. The model sees an example, makes a guess, gets told how far off it was, and nudges the relevant dials a small amount in the direction that would have made the guess better. Repeat this across enormous amounts of data and the final settings of the dials come to encode what the model knows and how it behaves. Once training stops, the dials are frozen, and the finished model ships with fixed weights. From that point on it answers using only what it learned up to the moment training ended.
+
+Continual learning keeps turning those dials after the model ships. Instead of freezing the weights, the model takes in new real-world data and adjusts its settings to stay current. In theory one model absorbs new facts, tasks, and feedback across its working life instead of going stale the day training ended. The hard part is that turning the dials to learn something new disturbs the settings that held old knowledge, so the model can forget what it knew. Much of what follows shows how to capture fresh learning without paying that price.
+
+Part of the goal of several labs that have emerged in this space is for every company or person to have their own model. Today, that remains far from feasible.
+Approaches
+In order to solve for the problems of continual learning there are three leading approaches:
+	•	Parametric modification (updating the base weights of the model)
+Parametric modification changes the model’s own dials after it ships. The new knowledge is reflected in automated updates to the weights, so the model carries the updated behavior wherever it runs and needs no reminder at query time. The trade off is that editing weights is slow and expensive, and doing it without disturbing old knowledge is the core problem these companies are solving.
+
+One notable attribute of standalone companies focused on parametric modification is they will need to either build on top of open source/weight models (eg Kimi, Deepseek, GLM, etc.) or they will need to closely partner with closed weight model owning labs (eg Open AI, Anthropic, Deepmind, etc.). The former would accrue yet more value to open source labs and the latter would lend itself more toward an eventual acqui-hire outcome. As mentioned in the open questions section it would be helpful to better understand a company’s product strategy here to have an idea of likely exit opportunities.
+
+There are a few companies actively working on this each with their own further unique approaches. 
+
+Name
+Year Founded
+Total Funding
+Web Traffic
+What They Do
+Brief Example
+Founder(s)
+Engram
+
+engram.com
+
+San Francisco, CA
+2025
+$98M
+
+Builds a "learned memory" layer that folds organization's corpus directly into model weights  so the model answers from internalized memory. Claims up to 100x fewer tokens at frontier-comparable quality.
+A Notion or Harvey agent that would otherwise re-read the same workspace on every call carries that knowledge in-weight, matching frontier output while spending a fraction of the tokens.
+Dan Biderman
+Sabri Eyuboglu
+Jessy Lin
+Jack Morris 
+Scott Linderman
+Chris Ré
+Prime Intellect
+
+primeintellect.ai
+
+San Francisco, CA
+2023
+$200M
+116k
+Open stack and distributed framework (prime-rl) that evolves model weights using asynchronous reinforcement learning . Their platform connects agent evals to improvement loops, executing post-training at massive scale.
+A coding agent fails a class of unit tests. Many machines run improvement loops at once, score the attempts, and push weight updates back to the shared model. 
+Vincent Weisser
+Johannes Hagemann
+Trajectory
+
+trajectory.ai
+
+San Francisco, CA
+2025
+$15M
+19k
+Continuous learning platform that turns usage logs into reinforcement learning feedback. Allows models to update their weights given failure and success data.
+A support bot keeps misrouting refund tickets. Those logged failures become reward signal, and the weights update so it routes them right on the next batch. 
+Ronak Malde
+Michael Elabde
+Arjun Karanam
+
+
+Relai
+
+relai.ai
+
+Bethesda, MD
+2024
+$6.9M
+8.4k
+Provides a verifiable continuous learning platform that intercepts agentic workflow failures and user feedback loops. 
+An agent keeps booking the wrong meeting room. Relai catches the failure and the user correction, verifies the fix, then folds it into the model. 
+Soheil Feizi
+Inference.net
+(inference.net)
+
+San Francisco, CA
+2022
+$12.3M
+68k
+Runs a full lifecycle platform (Catalyst) that captures production traffic and eval failures, turns them into training data, then fine-tunes and hosts task-specific custom models.
+A team runs a cheap custom model to tag support emails. As new ticket types show up, fresh production data retrains the model so it keeps pace 
+Francesco Virga
+Ibrahim Ahmed
+Amarjot Singh
+Activeloop
+
+activeloop.ai
+
+Mountain View, CA
+2018
+$20M
+
+Develops deep-tech database infrastructure designed specifically to feed continuous streaming loops directly into model weights
+A vision model misses a new product on the shelf. New labeled images stream from the database into the next training pass. 
+Davit Buniatyan
+Savante
+
+savante.ai 
+
+
+2023
+
+
+Trains custom specialist models for a customer's domain by RL post-training an open model against that customer's data, evaluations, and expert judgment.
+7B open model RL post-trained for JEE math, went from 54.7% to 90.2% and beat o4-mini and Gemini 2.5 Flash.
+Sachin Dharashivkar
+
+Rohith Pesala
+
+One thought is that these continual learning companies are the evolution of the original continuous fine tuning platforms such as Predibase and Lamini which were each aqui-hired by Rubrik and AMD respectively. At the time, fine-tuning took longer than expected to gain adoption, so these platforms had limited traction. Times have shifted, and the ongoing trend toward open-source, post-trained models, catalyzed by the Anthropic Fable ban, could create a better opportunity for these types of companies.
+
+Founders of leading fine tuning companies share common traits that can be pattern matched to founders of continual learning startups. Founders like Piero Molino, Travis Addair, and Devvret Rishi (Predibase) along with Sharon Zhou and Greg Diamos (Lamini) had experience scaling frameworks (Horovod, Ludwig) and hardware-software co-design (CUDA, MLPerf) allowed them to solve data routing and memory problems that were bottlenecks to their core product’s implementation at scale, beyond proof of concept research. When evaluating continual learning founding teams while their algorithmic research is fundamentally important, having the technical implementation depth to solve for engineering problems that present themselves will be critical for large scale deployment. Good questions to ask founding teams could be the following:
+	•	Who owns the research, and who owns the engineering? Are they the same person?
+	•	Who on the team has built large-scale training or high-traffic serving systems before, and where?
+	•	Has anyone on the team shipped something to real users at scale, or is this the first time?
+	•	What gap(s) in the team are you hiring for next?
+Ultimately to succeed in this highly competitive space it will be necessary that a founding team has a non-consensus viewpoint, a common attribute which is amplified by the presence of leading labs that are keenly focused on solving this problem as well. Some relevant questions to ask are included in the end of this paper in the key questions to ask founders in this space section.
+	•	neuromorphic hardware (wetware, thermodynamic computing, analog in-memory)
+
+Updating physical processors and memristors (replacement of transistors) to enable continuous learning at the hardware level,  to replicate biological brain mechanics and hardware-level plasticity.
+
+Why memristors? A transistor is the basic switch inside every chip today. It turns current on or off to represent a 1 or a 0 and holds no state of its own, so the chip must shuttle data to separate memory to do any work. A memristor is a circuit element whose resistance changes with the current that has passed through it, and it keeps that value even when the power is off. Because the value lives in the device, a memristor can store a number and compute with it in the same spot. That maps onto a model weight, the dial from earlier, so a grid of memristors can hold the weights and run the math where they sit. For continual learning, updating a weight can become a physical change to the device.
+Why people are pursuing a hardware approach: The rationale starts with the brain. A human brain learns throughout life, holds decades of memory, and runs on roughly twenty watts. A frontier model burns orders of magnitude more energy and still struggles to learn anything new after training without forgetting what it knew. Proponents argue the substrate itself is part of the problem and that better algorithms alone will not close the gap. Today’s chips keep compute and memory in separate places, so every weight update moves data across that gap, which is slow and power consuming.
+
+From that premise, co-locating memory and compute, letting the hardware adapt, and delivering continual learning that is cheap and always on, as in biology. Analog and in-memory designs update weights in place rather than through expensive memory traffic. Thermodynamic and probabilistic chips use physical noise for the sampling AI workloads need, at a fraction of the energy.
+
+
+Name
+Year Founded
+Total Funding
+Web Traffic
+What They Do
+Founder(s)
+Unconventional AI
+
+unconv.ai
+
+San Francisco, CA
+2025
+$475M
+
+Rethinking the foundations of the computer to optimize energy efficiency for AI, building silicon circuits that exhibit non-linear dynamics similar to biological intelligence.
+Naveen Rao
+Michael Carbin
+Sara Achour
+MeeLan Lee
+Cortical Labs
+
+corticallabs.com
+
+Melbourne, AU
+2019
+$11.7M
+
+Their biological arrays organically leverage natural cell plasticity to continuously learn and process workloads at near-zero power.
+Hon Weng Chong 
+
+Koniku
+
+koniku.com
+
+San Francisco, CA
+2023
+$49.3M
+
+Computing processors that integrate synthetic biological cells onto physical chips rather than utilizing traditional transistor circuits. 
+Oshiorenoya Agabi
+Innatera
+
+innatera.com 
+
+Netherlands
+2018
+$32.2M
+
+Develops ultra-low-power neuromorphic processors designed for sensor data and edge computing applications.
+Sumeet Kumar
+Extropic
+
+extropic.ai
+
+Austin, TX
+2022
+$14.1M
+
+Thermodynamic sampling units (pbits) that use thermal noise for probabilistic AI
+Guillaume Verdon
+Trevor McCourt
+
+
+Of these hardware competitors, Unconventional AI is the most relevant player from the list. The company was founded by Naveen Rao who was one of the co-founders of MosaicML acquired by Databricks. A chip today computes by simulating the math of a neural network one numeric step at a time, pushing numbers through transistors that are engineered to act as clean ones and zeros. Naveen's claim is that you can instead build an analog silicon chip whose own circuit physics behaves like the dynamics a model needs to run. Their thesis implies that some ideas from biology are useful, and that certain model families with built-in dynamics, things like diffusion energy-based models that already work by evolving a system over time, map onto this hardware better than a standard transformer does.
+Picture a voice AI model trained on one accent that has not heard other pronunciations. On a standard chip, each misrecognition is logged, sent to a data center, used to retrain the model, and pushed back to the device as a new version. On the chip described here, the correction is made to the weights themselves (the dials from earlier) on-device, so the application adapts to the new pronunciation at minimal cost. The weight update is a local physical change, which puts continual learning at the hardware layer after initial training has ended and lets the model incorporate new knowledge rapidly.
+
+	•	Non-parametric memory layers (a persistent external state memory)
+
+These are the startups that have pursued AI memory from a retrieval-first approach. It does not replace continual learning but complements it. The weights stay static while the agent’s working memory updates to reflect new information. 
+
+Flybridge has done deep work on this space (Research 1, Article 2). The conclusion is that memory is a challenging space to invest in as a standalone product, as differentiation has proven hard. Most players have received mixed feedback from users and have not delivered a superior experience, and most have shifted their pitch to an advanced caching, cost-saving approach. Memory is a key area of focus for foundation model providers, who view user memory as a key lever to maintain switching costs. 
+
+See full list of players in this link. Below table of a subset of these 
+
+Name
+Year Founded
+Total Funding
+What They Do
+Brief Example
+Founder(s)
+Lemma
+
+uselemma.ai
+
+San Francisco, CA
+2025
+$500k (YC)
+Acts as a continuous learning engine by programmatically generating prompt fixes to repair behavioral drift instantly.
+After a model change an agent greets users in too casual a tone. Lemma spots the drift and writes a prompt patch that corrects it, with no weight change. 
+Jerry Zhang
+Cole Gawin
+Zep
+
+getzep.com
+
+San Francisco, CA
+2023
+$2.3M
+extracts, enriches, and structures dialogue histories continuously into an accessible graph layer that persists across sessions.
+A user mentions a peanut allergy in chat. Zep pulls that fact into a graph so the assistant recalls it in later sessions. 
+Daniel Chalef
+Mem0
+
+mem0.ai
+
+San Francisco, CA
+2023
+$23.9M
+Creates an intelligent, self-improving long-term memory layer for AI applications that adapts based on user interactions.
+A user says they prefer aisle seats. Mem0 stores the preference and surfaces it the next time they book a flight. 
+Deshraj Yadav
+Taranjeet Singh
+Letta 
+
+letta.com 
+
+San Francisco, CA
+2024
+$10M
+Enables agents to manage, compress, and read-write to their own persistent storage subsystems.
+An agent runs low on context mid task. Letta lets it write notes to its own store and read them back later, like a working notebook. 
+Charles Packer
+Sarah Wooders
+
+Langfuse 
+
+langfuse.com
+
+Berlin, DE /
+San Francisco, CA
+2022
+$4M
+(acq.)
+Open-source AI engineering and evaluation tracing loops that allow development teams to monitor agent drift. 
+A team notices answers getting worse. Langfuse traces each agent step so they can see where the drift began and fix the prompt or tool. 
+Marc Klingen
+Max Deichmann Clemens Rawert
+
+Conclusion 
+One company listed above that stands out to me is Prime Intellect. Prime Intellect’s core offering is serving as the primary infrastructure layer for neolabs like Ricursive and Arcee, providing compute as well as managed training, inference, and research tooling/support. RL workloads drive the majority of their revenue, with post-training specifically as a growth area, while on-demand GPU rental is a small fraction (<10%) of their revenue. The team maintains a strong focus on continual learning as a north star, and the company has been a key driver in production continual learning success stories, most notably with Cursor, initially for their Tab model and now for Composer. 
+
+This is likely a difficult space for Flybridge to invest in today, but there is a significant opportunity here that, despite high early valuations, represents meaningful upside for startups that are able to capture value in this developing technology.  Many of the leading teams are based in San Francisco with $1B+ seed round valuations so the ownership stake would likely be below Flybridge’s desired targets for first investment. The high amounts of capital are unfortunately a necessity given the leading founder pedigrees, ongoing compute costs, and trial/error of different algorithmic improvements on both training and inference side. One thing I recommend looking for when evaluating a founding team is their published research during PhD or while working at other labs. For example, Engram co-founder Jessy Lin published this paper (https://arxiv.org/pdf/2510.15103) during her PhD at Berkeley. In diligence we can deeply research the founders’ published work, which will presumably be an area their company pursues as a research direction, to determine whether it is genuinely differentiated and it can be scaled to mass market usage. If there is a single common approach all startups in the space are pursuing then the value will be captured by leading labs (Anthropic, Open AI, Google) providing less value to startups outside of acqui-hires. The revenue opportunity here is, I believe, high enough to justify these aforementioned high valuations. Additional opportunities unlocked from continual learning differ by company but exist in adaptive models whether that is personalized systems, real time threat detection, or dynamic shifting recommendation systems. We are seeing this already with Engram, mentioned above, working with Notion on custom AI agents and Harvey to build agents that can adapt to new legal data on the fly.  Revenue paths I find credible include building small enterprise-specific models and updating them on a rolling basis, so each company runs a model that learns from its own workers and workflows, and, for a team that gains user traction, training its own foundation models, which today's market prices at a premium. I would be keen to speak with founders of companies in this space to further refine these perspectives and answer open questions which may shift my outlook on the market opportunity.
+
+
+
+Common misconceptions
+Weight updates and retrieval differ in cost and speed. A common mistake treats parametric updates and memory retrieval as interchangeable. They sit at opposite ends on cost and speed. Changing the weights is the slow, expensive path, running a training job scales directly with how often and how many models you update. Retrieval is quick and adds almost nothing per query beyond the tokens it pulls in. So even where weight updates fit, most systems still want a retrieval layer, since pulling facts from an external store is cheap and those facts can be cited, audited, and edited at low cost, which knowledge baked into the weights cannot.
+Continual learning is necessary for recursive self improvement, not sufficient. It is tempting to read continual learning as the last step before a model improves itself. A model that cannot take in new information will never recursively improve, so continual learning is a precondition. The harder capability is judgment: deciding what to learn, what to discard, and where to push next. A model can update its weights all day and still fail to choose good problems. That gap, covered in the RSI note above, is why continual learning clears one barrier to recursive self improvement without delivering it in full.
+
+Compute implications
+Parametric approaches push cost into training. Every weight update is a training run, so the more often a model relearns and the more models a provider keeps current, the higher the standing compute bill. A model that has internalized a task skips the same reasoning on every call, which saves compute on repeated work. The net effect raises system-level spending even as it trims per-task cost, and that spending flows to compute providers and to whoever owns the weight update pipeline.
+Memory approaches push cost into inference. Freezing the weights avoids the retraining bill, but the cost reappears at run time. Every call retrieves context and feeds it back through the model, which burns tokens per request and grows with usage. The spending shifts rather than disappears, landing on inference providers and on memory and retrieval tooling instead of the training pipeline.
+
+Recursive self improvement (RSI)
+A note on RSI, since it recurs through this thesis. Recursive self improvement is the point where an AI system can design and build its own successor with little human input, so each generation makes the next easier to build and progress compounds. It matters to a continual learning thesis because the two ideas are linked. A system that improves itself must learn after it ships, and learning after shipping is what continual learning provides.
+
+Anthropic wrote about this in a June 2026 piece titled When AI Builds Itself. Their claim is that AI is already speeding up AI development. As of May 2026, Claude wrote more than eighty percent of the code merged into Anthropic’s codebase, up from low single digits before early 2025, and the typical engineer shipped eight times as much code per day as in 2024. On a research test where models pick the next step in a real experiment, their best model beat the human choice 51 percent of the time in November 2025 and 64 percent by April 2026.
+
+The Anthropic piece is careful to say RSI has not arrived yet and is not inevitable. The capability that still separates today’s systems from a self improving one is judgment, choosing which problems are worth working on and which results to trust. Anthropic frames the automation of AI development as a dial that has been turning rather than a switch that flips, and lays out three futures. The trend could stall while today’s tools spread across the economy. Labs could keep compounding efficiency gains while humans set direction. Or systems could reach full self improvement and start building their successors.
+
+This is a necessary component of my continual learning thesis because of the dependency. A self improving system needs continual learning, since a model that cannot learn after training cannot bootstrap. That makes it worth tracking as a leading indicator, with the caveat below that it is necessary for RSI without being sufficient on its own.
+
+
+Company Guide
+
+As it becomes more practical for companies to turn proprietary data into a durable edge through continuous learning, founders should weigh four questions to gauge how much this paradigm is worth prioritizing:
+	•	Data scarcity and uniqueness - Are you generating high-quality, workflow-specific data that would be difficult for others to replicate?
+	•	Risk of model agnosticism - If your product sits purely on top of leading foundation models (GPT, Claude, etc.) with no proprietary learning loop of your own, does that create real competitive risk?
+	•	Ability to act on the data - Are you capitalized well enough to attract strong AI engineers and fund the compute needed to capture the full value of your data yourself? If not, partnering with one of the emerging distributed RL providers can let you capture partial value, with the rest accruing to that partner.
+	•	Stage and timing - Is the company mature enough that this should be a priority now, rather than a capability worth revisiting later?

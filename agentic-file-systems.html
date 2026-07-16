@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agentic File Systems — Flybridge Investment Thesis</title>
+<meta name="description" content="File systems are becoming the default interface agents use to store context, navigate work, and produce outputs. A Flybridge investment thesis on where value accrues in agent-native file systems." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<nav class="site-nav">
+  <div class="site-nav__inner">
+    <a href="index.html" class="site-nav__brand">Flybridge <span>Theses</span></a>
+    <button class="site-nav__toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="site-nav__links">
+      <a href="index.html">Overview</a>
+      <a href="continual-learning.html">Continual Learning</a>
+      <a href="agentic-file-systems.html" class="is-active">Agentic File Systems</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container container--wide">
+      <span class="eyebrow reveal">Flybridge Investment Thesis · 02</span>
+      <h1 class="word-reveal">Agentic File Systems</h1>
+      <p class="lede hero__lede reveal">File systems are becoming the default interface agents use to store context, navigate work, and produce outputs.</p>
+      <div class="hero__meta reveal">
+        <span>Jason Rubenstein</span>
+        <span class="dot"></span>
+        <span>Flybridge</span>
+      </div>
+      <div class="scroll-cue" aria-hidden="true">
+        <div class="scroll-cue__line"></div>
+        <span>Scroll</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Overview / definition -->
+  <section class="section--tight">
+    <div class="container reveal">
+      <p class="body-text">A file system organizes information into files and folders, the same pattern on every desktop. Every general purpose operating system, Windows, macOS, Linux, works this way, and models trained on code written for these systems can already traverse it well.</p>
+      <p class="body-text">An agent-native file system is a database that behaves like that ordinary file system to the agent. The agent runs the same open, read, and write operations it already knows. Underneath, the system adds version history, an append-only log of agent actions, and control over which files an agent can touch. This differs from a memory layer such as Mem0 or Letta, which helps an agent recall past interactions and preferences. An agentic file system instead lets the agent produce, version, and govern its own inputs and outputs.</p>
+      <p class="body-text">Value will accrue to file systems built for specific kinds of work. The underlying storage stays a commodity, the way basic cloud storage became a standard hyperscaler feature. A standalone file system startup cannot win on storage alone. AWS S3 dominates on scale, and Wasabi leads on hot storage with pricing that is hard to undercut.</p>
+    </div>
+  </section>
+
+  <!-- Three problems -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Unsolved problems</span>
+      <h2 class="section-title">Three problems only an agent-native file system solves</h2>
+      <p class="section-kicker">Traditional file systems were built for humans clicking through folders. Autonomous agents need three things a folder on a laptop was never built to give them.</p>
+    </div>
+
+    <div class="timeline container container--wide reveal">
+      <div class="timeline__spine">
+        <div class="timeline__spine-track"></div>
+        <div class="timeline__spine-fill"></div>
+      </div>
+      <div class="timeline__stages">
+        <div class="timeline__stage">
+          <span class="timeline__dot"></span>
+          <span class="timeline__stage-label">Problem one</span>
+          <h3>Context management</h3>
+          <p>Models hold limited memory, and reading a hundred files to finish a task strains what an agent can usefully produce. A file system lets an agent organize information and pull only the files it needs. Today most agents either re-read everything at each step or lean on the harness to manage retrieval, spending capacity on remembering instead of reasoning.</p>
+        </div>
+        <div class="timeline__stage">
+          <span class="timeline__dot"></span>
+          <span class="timeline__stage-label">Problem two</span>
+          <h3>An auditable action record</h3>
+          <p>Autonomous agents make consequential mistakes more often than a human would. A dedicated agent file system logs every operation and tool call in an append-only record, so humans can review what happened and trace a failure back to its source.</p>
+        </div>
+        <div class="timeline__stage">
+          <span class="timeline__dot"></span>
+          <span class="timeline__stage-label">Problem three</span>
+          <h3>Recoverable mistakes</h3>
+          <p>Agents will make errors. A file system gives users point-in-time snapshots and branches off historic versions. A human in the loop can rewind state to before an unwanted change and branch from that version, so people or sub-agents can work alongside the agent that made the mistake.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container container--wide reveal mt-4">
+      <p class="body-text">Cloud execution platforms such as E2B, Daytona, Modal, and Runloop, and coding tools such as Claude Code, Cursor, and Codex, address memory through combinations of sandbox persistence, volumes, and snapshots (<a href="#appendix-1" class="link-accent">definitions in the appendix below</a>). Claude Code and Cursor preserve files through git history, but working memory resets between sessions.</p>
+      <p class="body-text">A common workaround has agents maintain note files: an architecture summary, a running list of gotchas, a plan. Because agents write these as self-generated summaries, the notes drift stale as a project moves forward, and nothing links a piece of reasoning to the file version it explains.</p>
+    </div>
+  </section>
+
+  <!-- Pull quote 1 -->
+  <section class="section--tight">
+    <div class="container pull-quote reveal">
+      <p class="word-reveal">Git records what changed. It does not always record why.</p>
+      <cite>From the thesis</cite>
+    </div>
+  </section>
+
+  <!-- Why now -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Why now</span>
+      <h2 class="section-title">Why this breaks now, not five years ago</h2>
+      <p class="section-kicker">Agents handle files well because the code they trained on is dense with file operations. That fluency used to be enough. A single agent working alone needs little from a shared, live file system.</p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div class="callout">
+        <h4>Fluency and workload</h4>
+        <ul>
+          <li>Leading models learn from code full of file operations, so agents handle files and folders predictably.</li>
+          <li>Agents retrieve and synthesize information without knowing upfront how it should be organized. A file system lets them write freely. A database needs its structure defined in advance.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <h4>Interface and platform support</h4>
+        <ul>
+          <li>Reaching a file takes only its path. Reaching a database takes addresses, passwords, and logins, which costs an agent tokens and time.</li>
+          <li>OpenAI's Agents SDK now supports mounting a remote file system natively. When a distribution platform builds that connection point in, adoption of whatever plugs into it speeds up.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="container container--wide reveal mt-4">
+      <h3 style="font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 0.6em;">The multi-agent collision</h3>
+      <p class="body-text">A single agent has little need for a shared, live file system. The shift to orchestrator and sub-agent architectures changes that. When several agents write to the same state at once, they collide, producing conflicts, lost work, and results nobody can reproduce. The fix moves the file system off a single constrained machine and onto a shared layer where every agent, and every person, writes to the same state.</p>
+    </div>
+
+    <div class="collision reveal mt-3" aria-hidden="true">
+      <div class="collision__agent collision__agent--a">Sub-agent A</div>
+      <div class="collision__agent collision__agent--b">Sub-agent B</div>
+      <div class="collision__agent collision__agent--c">Sub-agent C</div>
+      <div class="collision__agent collision__agent--d">Orchestrator</div>
+      <div class="collision__line collision__line--a"></div>
+      <div class="collision__line collision__line--b"></div>
+      <div class="collision__line collision__line--c"></div>
+      <div class="collision__line collision__line--d"></div>
+      <div class="collision__hub">Shared file system</div>
+    </div>
+    <div class="viz-block reveal">
+      <p class="viz-caption"><strong>How to read this.</strong> Each agent writes to the same underlying state. Left alone, simultaneous writes collide. A shared file system layer reconciles them into one consistent version instead.</p>
+    </div>
+  </section>
+
+  <!-- Interface vs Engine -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Interface vs engine</span>
+      <h2 class="section-title">Where the stack creates defensibility</h2>
+      <p class="section-kicker">This is not a filesystem versus database question. The agent sees one directory and calls ls, read, and write. The backend routes to cloud or database stores underneath, and can swap from S3 to something else without touching the agent's reasoning trace.</p>
+    </div>
+
+    <div class="stack-diagram reveal-stagger">
+      <div class="stack-layer stack-layer--governance">
+        <div class="stack-chip">Legal</div>
+        <div class="stack-chip">Healthcare</div>
+        <div class="stack-chip">Financial services</div>
+        <div class="stack-chip">Research</div>
+        <div class="stack-chip">Robotics</div>
+      </div>
+      <div class="stack-layer__label text-center" style="text-align:center; margin: 0.4em 0;">Vertical governance layers · where defensibility lives</div>
+      <div class="stack-connector"></div>
+      <div class="stack-layer stack-layer--engine">
+        <div class="stack-layer__label">Horizontal interface layer</div>
+        <div class="stack-layer__title">File system engine</div>
+      </div>
+      <div class="stack-connector"></div>
+      <div class="stack-layer">
+        <div class="stack-layer__label">Commodity, hard to differentiate</div>
+        <div class="stack-layer__title">Cloud storage · S3, hyperscalers</div>
+      </div>
+    </div>
+
+    <div class="container container--wide reveal mt-4">
+      <p class="body-text">A database gives real advantages a filesystem typically lacks. It preserves old versions instead of overwriting them, avoids permanent loss through soft deletion, and lets multiple agents work at once without interfering with each other. Recreating those capabilities on top of a filesystem adds complexity that a database already solves.</p>
+      <p class="body-text">The two can coexist. Agents write schema-free, in whatever structure suits the task, while a database-backed system underneath runs structured queries across the full history of files, state, and tool calls. File-level permissions then limit each agent to only the files it should touch.</p>
+      <p class="body-text">Turso AgentFS is one example. It keeps everything in a single compact database file and exposes three things an agent needs: the files themselves, a running log for rollback and visibility, and a scratchpad for ongoing work. That single-file design is portable, though it does not hold up at scale on its own, which Turso is addressing by spreading storage across the cloud.</p>
+    </div>
+  </section>
+
+  <!-- Pull quote 2 -->
+  <section class="section--tight">
+    <div class="container pull-quote reveal">
+      <p class="word-reveal">A file system this low in the agent stack holds durability once enterprises adopt it.</p>
+      <cite>From the thesis</cite>
+    </div>
+  </section>
+
+  <!-- Market map -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Market map</span>
+      <h2 class="section-title">Who is building this</h2>
+      <p class="section-kicker">Toggle between how companies group by layer and how the opportunity splits by vertical. Hover or tap a card for detail.</p>
+    </div>
+
+    <div class="filter-center reveal">
+      <div class="filter-toggle" data-controls=".market-map">
+        <button class="filter-toggle__btn is-active" data-view-target="company">By company</button>
+        <button class="filter-toggle__btn" data-view-target="vertical">By vertical</button>
+      </div>
+    </div>
+
+    <div class="market-map reveal">
+
+      <div class="card-grid" data-view="company">
+
+        <div class="map-card">
+          <div class="map-card__label">London / Canada · 2021 · $7M raised · 337k traffic</div>
+          <div class="map-card__title">Turso AgentFS</div>
+          <div class="map-card__detail">
+            <p>SQLite engine made to look like a file system interface. Keeps old versions instead of overwriting them, ships as a portable file, and tracks the files, a running log of changes, and the agent's scratch notes.</p>
+            <p>Founders Glauber Costa and Pekka Enberg met at ScyllaDB, a MongoDB competitor, and now run a team of fifteen. Currently working to make the system scale to real company workloads.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">San Francisco, CA · 2024 · 19k traffic</div>
+          <div class="map-card__title">Mesa</div>
+          <div class="map-card__detail">
+            <p>A file system that remembers every version of any kind of file, built for company document work that needs sign-offs and a clear record of who did what.</p>
+            <p>Workflow-layer thesis aligned. The approvals and human sign-off layer line up with Lightspeed's research on this category. Founders Oliver Gilan and Ben Warren met at Microsoft, a team of five with no funding yet.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">Redwood City, CA · 2005 · $1.83B raised</div>
+          <div class="map-card__title">Box</div>
+          <div class="map-card__detail">
+            <p>Established public company offering the same folder-style access, wrapped in the security and compliance controls large companies already trust.</p>
+            <p>Owns enterprise content and governance distribution. Hard to displace in the general case. Competes against startups on regulated verticals.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">San Francisco, CA · 2024 · $18M raised · 11k traffic</div>
+          <div class="map-card__title">Archil</div>
+          <div class="map-card__detail">
+            <p>Turns cloud storage a company already owns, such as Amazon S3, into a fast local folder agents can read and write without moving the data first.</p>
+            <p>Removes the data-staging step and gives agents memory across runs, real infrastructure value, though it sits close to the raw storage that commoditizes. Founder Hunter Leath went through YC, with past experience in cloud storage systems at Netflix.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">San Francisco, CA · 2026</div>
+          <div class="map-card__title">Mirage / Strukto</div>
+          <div class="map-card__detail">
+            <p>Open-source unified virtual filesystem that mounts S3, Google Drive, Slack, GitHub, Redis, and a dozen other backends as one folder tree. Agents interact with all of them through standard Unix bash tools.</p>
+            <p>Strong on developer ergonomics. First public release in May 2026 drew 3,100 GitHub stars. Governance is light: no audit logs, no append-only event log, no formal permissioning, which limits fit for regulated verticals.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">E2B · Daytona · Modal · Vercel · Runloop</div>
+          <div class="map-card__title">Sandbox platforms</div>
+          <div class="map-card__detail">
+            <p>Temporary execution environments that spin up per run. They run the work, then forget everything when they shut down.</p>
+            <p>Some persistence layers have been built to fill this gap, with each company taking a slightly different approach.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">Mem0 · Letta · Zep</div>
+          <div class="map-card__title">Memory layers</div>
+          <div class="map-card__detail">
+            <p>Tools that store and recall facts so an agent can look things up later.</p>
+            <p>The alternate leading approach to capturing an agent's reasoning. Whether that reasoning should live here or inside the versioned file system stays an open question.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card-grid" data-view="vertical" style="display:none;">
+
+        <div class="map-card">
+          <div class="map-card__label">Legal · contracts, litigation</div>
+          <div class="map-card__title">Legal</div>
+          <div class="map-card__detail">
+            <p>Tracks specific document changes, keeps a record of who changed what, and controls who can see which documents by case and confidentiality level. Every version stays intact.</p>
+            <p>Long term value: a structured map of contract terms and obligations. iManage and NetDocuments already lead this market. Harvey, Legora, and peers may build a file system into their own offering.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">Healthcare · clinical, imaging</div>
+          <div class="map-card__title">Healthcare</div>
+          <div class="map-card__detail">
+            <p>Tracks who viewed a record, not only who edited it, since privacy law cares who looked at patient data. Stripping identifying details out where needed also matters here.</p>
+            <p>Long term value: a privacy and consent model for each health system. A system built to track edits differs from one built to track views.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">Financial services · trading, risk, audit</div>
+          <div class="map-card__title">Financial services</div>
+          <div class="map-card__detail">
+            <p>Records must stay exact, kept unchanged for years by law, and able to recreate what the data showed on any past date.</p>
+            <p>Long term value: traceability that survives a swap of the underlying storage. Regulators require it here, rather than customers simply preferring it.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">Research</div>
+          <div class="map-card__title">Research</div>
+          <div class="map-card__detail">
+            <p>Researchers branch off in many directions and merge back the parts that work. Reproducing a result means bundling data, code, setup, and settings together after frequent iteration.</p>
+            <p>Long term value: reusable records of how each result was reached.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">Robotics · field operations</div>
+          <div class="map-card__title">Robotics and field operations</div>
+          <div class="map-card__detail">
+            <p>Runs on the device in the field rather than in the cloud, responds fast when timing matters, records a heavy stream of sensor data, and re-syncs without conflict after losing connection.</p>
+            <p>Long term value: the syncing layer itself, plus a stored map of work. A fundamentally different design from standalone document-tracking tools.</p>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <div class="map-card__label">Coding · general analytics</div>
+          <div class="map-card__title">Coding and general analytics</div>
+          <div class="map-card__detail">
+            <p>Standard version control for code, or standard querying for data.</p>
+            <p>Whatever the system accumulates moves with the files, so nothing locks the customer in, and the established data-warehouse players already own the analytics side. I would hesitate on a standalone product here, since big AI labs and existing developer tools already reach these customers. Tools like entire.io show the reasoning-capture pattern still has room to run inside git workflows.<sup class="fn-ref" data-fn="fn1">1</sup></p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Why not winner take all -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Why not winner take all</span>
+      <h2 class="section-title">Four reasons this market splits</h2>
+      <p class="section-kicker">Assessed against four pillars of a winner-take-all market, this space does not favor one winner.<sup class="fn-ref" data-fn="fn2">2</sup></p>
+    </div>
+    <div class="container reveal">
+      <p class="body-text"><strong>Network effects are weak.</strong> One user's usage does not benefit another. Heavy use makes the product better for that one customer, which locks the customer in rather than pulling new customers toward it.</p>
+      <p class="body-text"><strong>Switching costs cut both ways.</strong> Box, Mesa, and LangChain's Deep Agents pattern argue that an agent depends only on filesystem semantics, so the backend swaps without a costly rewrite. That portability makes the vendor a two-way choice and weakens lock-in. Reasoning and memory that accumulate per use run the other way, and compound into stickiness.</p>
+      <p class="body-text"><strong>Different verticals value different features.</strong> Coding, research, analytics, and document-heavy regulated work each weigh version tracking, oversight, and file types differently. That splits the market into several specialized winners while incumbents keep the generic, one-size-fits-all business.</p>
+      <p class="body-text"><strong>Agent ergonomics argue against fragmentation.</strong> In developer tools, small interface differences compound into large gaps in overall experience. The same will hold for agent-facing systems, where how a file system exposes information, errors, and history will shape adoption speed.</p>
+    </div>
+  </section>
+
+  <!-- Recommendation -->
+  <section class="section section-border">
+    <div class="container reveal">
+      <span class="eyebrow">Recommendation</span>
+      <h2 class="section-title">Where the standalone opportunity sits</h2>
+      <p class="body-text">The standalone opportunity is narrow. It lives in regulated verticals with real governance requirements and no vertical AI workflow owner today.</p>
+      <p class="body-text">There is no single lead vertical. I expect several winners across coding, regulated document work in legal, health, and finance, research and analytics, and robotics and field operations, each rewarding a different filesystem profile. Coding is excluded for the reasons above. The space is crowded, and labs and harness vendors already compete there directly.</p>
+      <p class="body-text">I look for teams that commit to one vertical with legitimate governance requirements, accumulate per-user context that compounds, couple agent reasoning to the outputs in the same versioned read path, and stay backend-agnostic.</p>
+      <p class="body-text">In verticals with real regulation, a file system can stand alone as a company, because it becomes the system of record other systems integrate with. Vertical platforms will keep adopting file systems as part of their own offering too. I would expect Harvey, for example, to build a file system for its law firm clients with the features listed above. A general-purpose file system commoditizes, and the hyperscalers and Box are the more likely winners there.</p>
+    </div>
+  </section>
+
+  <!-- What could change this -->
+  <section class="section section-border">
+    <div class="container reveal">
+      <span class="eyebrow">What could change this</span>
+      <h2 class="section-title">The case against this thesis</h2>
+      <p class="body-text">A lab shipping a general-purpose agentic filesystem with native governance and reasoning capture would be strong enough that vertical specialization stops mattering. Even so, labs have tried to enter adjacent markets before and have not won them, and specialized players have kept real share.</p>
+      <p class="body-text">A more negative development would be a memory layer absorbing reasoning capture. That would weaken the structural case for a separate file system.</p>
+      <p class="body-text">The bull case for a general-purpose competitor is gaining share across industries fast, then building derivative products that entrench value inside the enterprise. A file system this low in the agent stack holds durability once an enterprise adopts it. The open question is how fast a startup can gain share before that happens.</p>
+    </div>
+  </section>
+
+  <!-- Open questions -->
+  <section class="section section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Open questions</span>
+      <h2 class="section-title">What if we're wrong?</h2>
+    </div>
+    <div class="what-if-panel reveal">
+      <ul class="question-list">
+        <li>What will a company deploying agents actually pay for an agentic native file system?</li>
+        <li>Which underlying design wins for which kind of work, and at what company size? Our current guess is that lightweight, single-file designs fit early-stage and smaller use, while large enterprises need storage spread across the cloud.</li>
+        <li>Does reasoning capture belong inside the file system, or inside a separate memory tool?</li>
+        <li>Is there room for one company to move fast and offer a wide set of features that work across every vertical?</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Appendices -->
+  <section class="section--tight section-border">
+    <div class="container container--wide reveal">
+      <span class="eyebrow">Appendices</span>
+      <h2 class="section-title" style="margin-bottom: var(--space-3);">Reference material</h2>
+
+      <div class="accordion accordion--plain" id="appendix-1">
+        <div class="accordion__item">
+          <button class="accordion__trigger" aria-expanded="false">
+            Appendix 1 · Execution environment persistence concepts
+            <span class="plus"></span>
+          </button>
+          <div class="accordion__panel">
+            <div class="accordion__panel-inner">
+              <p><strong>Sandbox persistence.</strong> Sandboxes are isolated environments where code runs. By default they wipe clean on shutdown. Sandbox persistence means the state survives between runs, so an agent picks up where it left off.</p>
+              <p><strong>Volumes.</strong> Storage attached to a running environment that survives restarts and can move between environments, like an external hard drive that different machines can plug into without losing data.</p>
+              <p><strong>Snapshots.</strong> A read-only copy of an environment's full state at a point in time. If something breaks, the system reverts to the snapshot.</p>
+              <p><strong>Stateful operations.</strong> Operations where the result depends on prior context. A stateful agent knows what it has already read, decided, and written within a session.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion__item">
+          <button class="accordion__trigger" aria-expanded="false">
+            Appendix 2 · Graph-and-event-log architecture
+            <span class="plus"></span>
+          </button>
+          <div class="accordion__panel">
+            <div class="accordion__panel-inner">
+              <p>Every file is a node. Every relationship between files is a typed edge. Every agent action is an entry in an append-only event log with the reasoning attached.</p>
+              <p>Nodes represent files and folders. Edges capture relationships such as <strong>CONTAINS</strong>, <strong>DERIVED_FROM</strong>, and <strong>REFERENCES</strong>.</p>
+              <p>Each event log entry records what operation ran and on which file version, why the agent made that choice, what alternatives it rejected, and what prior event triggered it.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footnotes -->
+  <section class="section--tight">
+    <div class="container footnotes reveal">
+      <h2>Footnotes</h2>
+      <ol>
+        <li id="fn1"><span>entire.io is an open source project from former GitHub CEO Thomas Dohmke, backed by a $60M seed. Any developer can install it to capture agent session history, track concurrent agents, and keep full version history native to git, with shared agent memory on its roadmap.</span></li>
+        <li id="fn2"><span>The four pillars, network effects, switching costs, vertical variation, and interface ergonomics, are the lens this thesis uses to test whether a market tends toward one winner.</span></li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__attrib">
+      <p>Written by Jason Rubenstein at Flybridge. Read the published version, <a href="https://www.flybridge.com/ideas/the-bow/agentic-file-systems" class="link-accent" target="_blank" rel="noopener">Agentic File Systems</a>, on Flybridge's site.</p>
+    </div>
+    <nav class="site-footer__nav">
+      <a href="index.html">Overview</a>
+      <a href="continual-learning.html">Continual Learning</a>
+      <a href="agentic-file-systems.html">Agentic File Systems</a>
+    </nav>
+    <div class="site-footer__legal">Flybridge · Internal research, adapted for the web.</div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
