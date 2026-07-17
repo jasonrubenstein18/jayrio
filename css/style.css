@@ -1221,6 +1221,22 @@ body.has-scrolled .scroll-cue {
   margin-top: 0.8em;
 }
 
+.company-card__founders a {
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent-soft-2);
+}
+
+.company-card__founders a:hover {
+  border-color: var(--accent);
+}
+
+.data-source {
+  margin-top: calc(-1 * var(--space-3));
+  margin-bottom: var(--space-4);
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+}
+
 .group-heading {
   display: flex;
   align-items: baseline;
@@ -1775,7 +1791,7 @@ body.has-scrolled .scroll-cue {
 
 .map-card:hover .map-card__detail,
 .map-card.is-open .map-card__detail {
-  max-height: 260px;
+  max-height: 340px;
   opacity: 1;
   margin-top: 0.6em;
 }

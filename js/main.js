@@ -100,6 +100,78 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* Company guide placement + Harmonic enrichment                       */
+  /* ------------------------------------------------------------------ */
+
+  document.querySelectorAll("[data-promote-after-intro]").forEach(function (section) {
+    var main = section.closest("main");
+    var hero = main ? main.querySelector(".hero") : null;
+    var intro = hero ? hero.nextElementSibling : null;
+    if (intro) intro.insertAdjacentElement("afterend", section);
+  });
+
+  var companyData = window.COMPANY_ENRICHMENT || {};
+
+  function fundingLabel(value) {
+    return value.charAt(0) === "$" ? value + " funding" : value;
+  }
+
+  function makeFounderLine(founders) {
+    var line = document.createElement("p");
+    line.className = "company-card__founders";
+    line.appendChild(document.createTextNode((founders.length === 1 ? "Founder: " : "Founders: ")));
+
+    founders.forEach(function (founder, index) {
+      if (index) line.appendChild(document.createTextNode(", "));
+      var link = document.createElement("a");
+      link.href = founder[1];
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = founder[0];
+      link.appendChild(document.createTextNode(" ↗"));
+      line.appendChild(link);
+    });
+
+    return line;
+  }
+
+  document.querySelectorAll(".company-card").forEach(function (card) {
+    var title = card.querySelector(".card-title");
+    var data = title ? companyData[title.textContent.trim()] : null;
+    if (!data) return;
+
+    var meta = card.querySelector(".company-card__meta");
+    if (meta) {
+      meta.innerHTML = "";
+      ["Founded " + data.founded, fundingLabel(data.funding), data.headcount.toLocaleString() + " people"].forEach(function (value) {
+        var item = document.createElement("span");
+        item.textContent = value;
+        meta.appendChild(item);
+      });
+    }
+
+    var oldFounders = card.querySelector(".company-card__founders");
+    if (oldFounders) oldFounders.replaceWith(makeFounderLine(data.founders));
+  });
+
+  document.querySelectorAll(".map-card").forEach(function (card) {
+    var title = card.querySelector(".map-card__title");
+    var data = title ? companyData[title.textContent.trim()] : null;
+    if (!data) return;
+
+    var label = card.querySelector(".map-card__label");
+    if (label) {
+      label.textContent =
+        "Founded " + data.founded + " · " +
+        fundingLabel(data.funding) + " · " +
+        data.headcount.toLocaleString() + " people";
+    }
+
+    var detail = card.querySelector(".map-card__detail");
+    if (detail) detail.appendChild(makeFounderLine(data.founders));
+  });
+
+  /* ------------------------------------------------------------------ */
   /* Scroll reveal                                                       */
   /* ------------------------------------------------------------------ */
 
