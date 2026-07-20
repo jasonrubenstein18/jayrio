@@ -116,6 +116,30 @@
     return value.charAt(0) === "$" ? value + " funding" : value;
   }
 
+  function websiteLabel(url) {
+    try {
+      var host = new URL(url).hostname.replace(/^www\./, "");
+      var path = new URL(url).pathname.replace(/\/$/, "");
+      if (host === "github.com" && path) return host + path;
+      return host;
+    } catch (err) {
+      return url;
+    }
+  }
+
+  function makeWebsiteLine(url) {
+    var line = document.createElement("p");
+    line.className = "company-card__site";
+    var link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = websiteLabel(url);
+    link.appendChild(document.createTextNode(" ↗"));
+    line.appendChild(link);
+    return line;
+  }
+
   function makeFounderLine(founders) {
     var line = document.createElement("p");
     line.className = "company-card__founders";
@@ -150,8 +174,20 @@
       });
     }
 
+    var body = card.querySelector(".company-card__body-inner");
     var oldFounders = card.querySelector(".company-card__founders");
+    var oldSite = card.querySelector(".company-card__site");
+    if (oldSite) oldSite.remove();
+
     if (oldFounders) oldFounders.replaceWith(makeFounderLine(data.founders));
+    else if (body) body.appendChild(makeFounderLine(data.founders));
+
+    if (data.website && body) {
+      var foundersLine = card.querySelector(".company-card__founders");
+      var siteLine = makeWebsiteLine(data.website);
+      if (foundersLine) foundersLine.insertAdjacentElement("afterend", siteLine);
+      else body.appendChild(siteLine);
+    }
   });
 
   document.querySelectorAll(".map-card").forEach(function (card) {
@@ -168,7 +204,15 @@
     }
 
     var detail = card.querySelector(".map-card__detail");
-    if (detail) detail.appendChild(makeFounderLine(data.founders));
+    if (!detail) return;
+
+    var oldFounders = detail.querySelector(".company-card__founders");
+    var oldSite = detail.querySelector(".company-card__site");
+    if (oldFounders) oldFounders.remove();
+    if (oldSite) oldSite.remove();
+
+    detail.appendChild(makeFounderLine(data.founders));
+    if (data.website) detail.appendChild(makeWebsiteLine(data.website));
   });
 
   /* ------------------------------------------------------------------ */

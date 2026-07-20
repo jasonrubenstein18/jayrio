@@ -1215,18 +1215,25 @@ body.has-scrolled .scroll-cue {
   margin-top: 0.8em;
 }
 
-.company-card__founders {
+.company-card__founders,
+.company-card__site {
   font-size: 0.78rem;
   color: var(--text-tertiary);
   margin-top: 0.8em;
 }
 
-.company-card__founders a {
+.company-card__site {
+  margin-top: 0.35em;
+}
+
+.company-card__founders a,
+.company-card__site a {
   color: var(--accent);
   border-bottom: 1px solid var(--accent-soft-2);
 }
 
-.company-card__founders a:hover {
+.company-card__founders a:hover,
+.company-card__site a:hover {
   border-color: var(--accent);
 }
 
