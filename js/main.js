@@ -796,27 +796,41 @@
       if (resumeFill) resumeFill.style.width = pct + "%";
       if (resumeProgress) resumeProgress.style.width = pct + "%";
 
-      var bestIndex = 0;
-      if (max <= 0 || scrollLeft <= 12) {
-        bestIndex = 0;
-      } else if (scrollLeft >= max - 12) {
-        bestIndex = resumeStops.length - 1;
-      } else {
-        var trackRect = resumeTrack.getBoundingClientRect();
-        var focusX = trackRect.left + trackRect.width * 0.5;
-        var bestDistance = Infinity;
-
-        resumeStops.forEach(function (stop, index) {
-          var rect = stop.getBoundingClientRect();
-          var marker = stop.querySelector(".resume-stop__dot");
-          var pointX = marker ? marker.getBoundingClientRect().left + marker.offsetWidth / 2 : rect.left + Math.min(24, rect.width * 0.1);
-          var distance = Math.abs(pointX - focusX);
-          if (distance < bestDistance) {
-            bestDistance = distance;
-            bestIndex = index;
-          }
-        });
+      var n = resumeStops.length;
+      if (!n) {
+        resumeTicking = false;
+        return;
       }
+
+      if (max <= 0) {
+        setResumeActive(0);
+        resumeTicking = false;
+        return;
+      }
+
+      // Prefer the stop whose centered scroll target is closest to the current
+      // scrollLeft. Clamp targets so first/last remain selectable at the ends.
+      var wrapRect = resumeTrack.getBoundingClientRect();
+      var viewCenter = resumeTrack.clientWidth / 2;
+      var bestIndex = 0;
+      var bestDist = Infinity;
+
+      for (var i = 0; i < n; i++) {
+        var stopRect = resumeStops[i].getBoundingClientRect();
+        var stopCenter =
+          scrollLeft + (stopRect.left - wrapRect.left) + stopRect.width * 0.5;
+        var target = stopCenter - viewCenter;
+        if (target < 0) target = 0;
+        if (target > max) target = max;
+        var dist = Math.abs(target - scrollLeft);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIndex = i;
+        }
+      }
+
+      if (scrollLeft <= 2) bestIndex = 0;
+      if (scrollLeft >= max - 2) bestIndex = n - 1;
 
       setResumeActive(bestIndex);
       resumeTicking = false;

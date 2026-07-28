@@ -2358,7 +2358,7 @@ body.has-scrolled .scroll-cue {
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   scrollbar-width: thin;
   scrollbar-color: var(--accent-soft-2) transparent;
   outline: none;
@@ -2386,14 +2386,18 @@ body.has-scrolled .scroll-cue {
   gap: 0;
   width: max-content;
   min-height: min(68vh, 640px);
-  /* Side padding lets the first and last stops snap into the center focus zone. */
-  padding: 3.5rem max(8vw, calc(50% - min(39vw, 210px))) 4rem;
+  padding: 3.5rem 0 4rem;
+}
+
+.resume-track__spacer {
+  flex: 0 0 max(1.5rem, calc(50vw - min(39vw, 210px)));
+  pointer-events: none;
 }
 
 .resume-spine {
   position: absolute;
-  left: 8vw;
-  right: 8vw;
+  left: max(1.5rem, calc(50vw - min(39vw, 210px)));
+  right: max(1.5rem, calc(50vw - min(39vw, 210px)));
   top: calc(3.5rem + 0.55rem);
   height: 2px;
   pointer-events: none;
@@ -2570,12 +2574,16 @@ body.has-scrolled .scroll-cue {
 
   .resume-track {
     min-height: auto;
-    padding: 2.75rem max(1.15rem, calc(50% - min(44vw, 170px))) 3.25rem;
+    padding: 2.75rem 0 3.25rem;
+  }
+
+  .resume-track__spacer {
+    flex-basis: max(1.15rem, calc(50vw - min(44vw, 170px)));
   }
 
   .resume-spine {
-    left: 1.15rem;
-    right: 1.15rem;
+    left: max(1.15rem, calc(50vw - min(44vw, 170px)));
+    right: max(1.15rem, calc(50vw - min(44vw, 170px)));
     top: calc(2.75rem + 0.55rem);
   }
 
