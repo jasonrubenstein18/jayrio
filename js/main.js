@@ -791,23 +791,32 @@
 
     function updateResumeTimeline() {
       var max = resumeMaxScroll();
-      var pct = max > 0 ? (resumeTrack.scrollLeft / max) * 100 : 0;
+      var scrollLeft = resumeTrack.scrollLeft;
+      var pct = max > 0 ? (scrollLeft / max) * 100 : 0;
       if (resumeFill) resumeFill.style.width = pct + "%";
       if (resumeProgress) resumeProgress.style.width = pct + "%";
 
-      var focusX = resumeTrack.getBoundingClientRect().left + resumeTrack.clientWidth * 0.42;
       var bestIndex = 0;
-      var bestDistance = Infinity;
+      if (max <= 0 || scrollLeft <= 12) {
+        bestIndex = 0;
+      } else if (scrollLeft >= max - 12) {
+        bestIndex = resumeStops.length - 1;
+      } else {
+        var trackRect = resumeTrack.getBoundingClientRect();
+        var focusX = trackRect.left + trackRect.width * 0.5;
+        var bestDistance = Infinity;
 
-      resumeStops.forEach(function (stop, index) {
-        var rect = stop.getBoundingClientRect();
-        var center = rect.left + rect.width * 0.35;
-        var distance = Math.abs(center - focusX);
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          bestIndex = index;
-        }
-      });
+        resumeStops.forEach(function (stop, index) {
+          var rect = stop.getBoundingClientRect();
+          var marker = stop.querySelector(".resume-stop__dot");
+          var pointX = marker ? marker.getBoundingClientRect().left + marker.offsetWidth / 2 : rect.left + Math.min(24, rect.width * 0.1);
+          var distance = Math.abs(pointX - focusX);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestIndex = index;
+          }
+        });
+      }
 
       setResumeActive(bestIndex);
       resumeTicking = false;

@@ -2386,7 +2386,8 @@ body.has-scrolled .scroll-cue {
   gap: 0;
   width: max-content;
   min-height: min(68vh, 640px);
-  padding: 3.5rem 8vw 4rem;
+  /* Side padding lets the first and last stops snap into the center focus zone. */
+  padding: 3.5rem max(8vw, calc(50% - min(39vw, 210px))) 4rem;
 }
 
 .resume-spine {
@@ -2569,7 +2570,7 @@ body.has-scrolled .scroll-cue {
 
   .resume-track {
     min-height: auto;
-    padding: 2.75rem 1.15rem 3.25rem;
+    padding: 2.75rem max(1.15rem, calc(50% - min(44vw, 170px))) 3.25rem;
   }
 
   .resume-spine {
