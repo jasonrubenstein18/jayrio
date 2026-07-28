@@ -2358,7 +2358,7 @@ body.has-scrolled .scroll-cue {
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x proximity;
+  scroll-snap-type: x mandatory;
   scrollbar-width: thin;
   scrollbar-color: var(--accent-soft-2) transparent;
   outline: none;
@@ -2390,14 +2390,16 @@ body.has-scrolled .scroll-cue {
 }
 
 .resume-track__spacer {
-  flex: 0 0 max(1.5rem, calc(50vw - min(39vw, 210px)));
+  flex: 0 0 40vw;
+  width: 40vw;
+  min-width: 40vw;
   pointer-events: none;
 }
 
 .resume-spine {
   position: absolute;
-  left: max(1.5rem, calc(50vw - min(39vw, 210px)));
-  right: max(1.5rem, calc(50vw - min(39vw, 210px)));
+  left: 8vw;
+  right: 8vw;
   top: calc(3.5rem + 0.55rem);
   height: 2px;
   pointer-events: none;
@@ -2578,12 +2580,14 @@ body.has-scrolled .scroll-cue {
   }
 
   .resume-track__spacer {
-    flex-basis: max(1.15rem, calc(50vw - min(44vw, 170px)));
+    flex-basis: 36vw;
+    width: 36vw;
+    min-width: 36vw;
   }
 
   .resume-spine {
-    left: max(1.15rem, calc(50vw - min(44vw, 170px)));
-    right: max(1.15rem, calc(50vw - min(44vw, 170px)));
+    left: 8vw;
+    right: 8vw;
     top: calc(2.75rem + 0.55rem);
   }
 

@@ -772,6 +772,7 @@
   var resumeTrack = document.getElementById("resume-track");
   if (resumeTrack) {
     var resumeStops = Array.prototype.slice.call(resumeTrack.querySelectorAll(".resume-stop"));
+    var resumeSpacers = Array.prototype.slice.call(resumeTrack.querySelectorAll(".resume-track__spacer"));
     var resumeFill = document.getElementById("resume-spine-fill");
     var resumeProgress = document.getElementById("resume-progress-fill");
     var resumeActive = -1;
@@ -779,6 +780,28 @@
 
     function resumeMaxScroll() {
       return Math.max(0, resumeTrack.scrollWidth - resumeTrack.clientWidth);
+    }
+
+    function sizeResumeSpacers() {
+      if (!resumeStops.length || !resumeSpacers.length) return;
+      var stopWidth = resumeStops[0].getBoundingClientRect().width;
+      var pad = Math.max(24, Math.round(resumeTrack.clientWidth / 2 - stopWidth / 2));
+      resumeSpacers.forEach(function (spacer) {
+        spacer.style.flex = "0 0 " + pad + "px";
+        spacer.style.width = pad + "px";
+        spacer.style.minWidth = pad + "px";
+      });
+    }
+
+    function centerResumeStop(index, behavior) {
+      var stop = resumeStops[index];
+      if (!stop) return;
+      var wrapRect = resumeTrack.getBoundingClientRect();
+      var stopRect = stop.getBoundingClientRect();
+      var delta = stopRect.left + stopRect.width / 2 - (wrapRect.left + wrapRect.width / 2);
+      var target = resumeTrack.scrollLeft + delta;
+      target = Math.max(0, Math.min(resumeMaxScroll(), target));
+      resumeTrack.scrollTo({ left: target, behavior: behavior || "auto" });
     }
 
     function setResumeActive(index) {
@@ -802,27 +825,17 @@
         return;
       }
 
-      if (max <= 0) {
-        setResumeActive(0);
-        resumeTicking = false;
-        return;
-      }
-
-      // Prefer the stop whose centered scroll target is closest to the current
-      // scrollLeft. Clamp targets so first/last remain selectable at the ends.
+      // Whichever stop is closest to the viewport center is active. With side
+      // spacers, Apple starts centered and the final stop can center at the end.
       var wrapRect = resumeTrack.getBoundingClientRect();
-      var viewCenter = resumeTrack.clientWidth / 2;
+      var focusX = wrapRect.left + wrapRect.width / 2;
       var bestIndex = 0;
       var bestDist = Infinity;
 
       for (var i = 0; i < n; i++) {
         var stopRect = resumeStops[i].getBoundingClientRect();
-        var stopCenter =
-          scrollLeft + (stopRect.left - wrapRect.left) + stopRect.width * 0.5;
-        var target = stopCenter - viewCenter;
-        if (target < 0) target = 0;
-        if (target > max) target = max;
-        var dist = Math.abs(target - scrollLeft);
+        var stopCenter = stopRect.left + stopRect.width / 2;
+        var dist = Math.abs(stopCenter - focusX);
         if (dist < bestDist) {
           bestDist = dist;
           bestIndex = i;
@@ -830,7 +843,7 @@
       }
 
       if (scrollLeft <= 2) bestIndex = 0;
-      if (scrollLeft >= max - 2) bestIndex = n - 1;
+      if (max > 0 && scrollLeft >= max - 2) bestIndex = n - 1;
 
       setResumeActive(bestIndex);
       resumeTicking = false;
@@ -840,6 +853,21 @@
       if (resumeTicking) return;
       resumeTicking = true;
       requestAnimationFrame(updateResumeTimeline);
+    }
+
+    function layoutResumeTrack(recenterFirst) {
+      sizeResumeSpacers();
+      if (recenterFirst) {
+        requestAnimationFrame(function () {
+          sizeResumeSpacers();
+          resumeTrack.scrollLeft = 0;
+          centerResumeStop(0, "auto");
+          setResumeActive(0);
+          updateResumeTimeline();
+        });
+        return;
+      }
+      updateResumeTimeline();
     }
 
     resumeTrack.addEventListener(
@@ -859,25 +887,28 @@
     );
 
     resumeTrack.addEventListener("scroll", requestResumeUpdate, { passive: true });
-    window.addEventListener("resize", requestResumeUpdate);
+    window.addEventListener("resize", function () {
+      layoutResumeTrack(false);
+    });
 
     resumeTrack.addEventListener("keydown", function (event) {
-      var step = Math.round(resumeTrack.clientWidth * 0.72);
       if (event.key === "ArrowRight") {
         event.preventDefault();
-        resumeTrack.scrollBy({ left: step, behavior: "smooth" });
+        var next = Math.min(resumeStops.length - 1, Math.max(0, resumeActive) + 1);
+        centerResumeStop(next, "smooth");
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
-        resumeTrack.scrollBy({ left: -step, behavior: "smooth" });
+        var prev = Math.max(0, Math.max(0, resumeActive) - 1);
+        centerResumeStop(prev, "smooth");
       } else if (event.key === "Home") {
         event.preventDefault();
-        resumeTrack.scrollTo({ left: 0, behavior: "smooth" });
+        centerResumeStop(0, "smooth");
       } else if (event.key === "End") {
         event.preventDefault();
-        resumeTrack.scrollTo({ left: resumeMaxScroll(), behavior: "smooth" });
+        centerResumeStop(resumeStops.length - 1, "smooth");
       }
     });
 
-    updateResumeTimeline();
+    layoutResumeTrack(true);
   }
 })();
