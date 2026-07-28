@@ -764,4 +764,97 @@
     resetMatch();
     requestAnimationFrame(gameLoop);
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Resume — horizontal experience timeline                             */
+  /* ------------------------------------------------------------------ */
+
+  var resumeTrack = document.getElementById("resume-track");
+  if (resumeTrack) {
+    var resumeStops = Array.prototype.slice.call(resumeTrack.querySelectorAll(".resume-stop"));
+    var resumeFill = document.getElementById("resume-spine-fill");
+    var resumeProgress = document.getElementById("resume-progress-fill");
+    var resumeActive = -1;
+    var resumeTicking = false;
+
+    function resumeMaxScroll() {
+      return Math.max(0, resumeTrack.scrollWidth - resumeTrack.clientWidth);
+    }
+
+    function setResumeActive(index) {
+      if (index === resumeActive) return;
+      resumeActive = index;
+      resumeStops.forEach(function (stop, i) {
+        stop.classList.toggle("is-active", i === index);
+      });
+    }
+
+    function updateResumeTimeline() {
+      var max = resumeMaxScroll();
+      var pct = max > 0 ? (resumeTrack.scrollLeft / max) * 100 : 0;
+      if (resumeFill) resumeFill.style.width = pct + "%";
+      if (resumeProgress) resumeProgress.style.width = pct + "%";
+
+      var focusX = resumeTrack.getBoundingClientRect().left + resumeTrack.clientWidth * 0.42;
+      var bestIndex = 0;
+      var bestDistance = Infinity;
+
+      resumeStops.forEach(function (stop, index) {
+        var rect = stop.getBoundingClientRect();
+        var center = rect.left + rect.width * 0.35;
+        var distance = Math.abs(center - focusX);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
+      });
+
+      setResumeActive(bestIndex);
+      resumeTicking = false;
+    }
+
+    function requestResumeUpdate() {
+      if (resumeTicking) return;
+      resumeTicking = true;
+      requestAnimationFrame(updateResumeTimeline);
+    }
+
+    resumeTrack.addEventListener(
+      "wheel",
+      function (event) {
+        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+        var max = resumeMaxScroll();
+        if (max <= 0) return;
+        var atStart = resumeTrack.scrollLeft <= 0 && event.deltaY < 0;
+        var atEnd = resumeTrack.scrollLeft >= max - 1 && event.deltaY > 0;
+        if (atStart || atEnd) return;
+        event.preventDefault();
+        resumeTrack.scrollLeft += event.deltaY;
+        requestResumeUpdate();
+      },
+      { passive: false }
+    );
+
+    resumeTrack.addEventListener("scroll", requestResumeUpdate, { passive: true });
+    window.addEventListener("resize", requestResumeUpdate);
+
+    resumeTrack.addEventListener("keydown", function (event) {
+      var step = Math.round(resumeTrack.clientWidth * 0.72);
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        resumeTrack.scrollBy({ left: step, behavior: "smooth" });
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        resumeTrack.scrollBy({ left: -step, behavior: "smooth" });
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        resumeTrack.scrollTo({ left: 0, behavior: "smooth" });
+      } else if (event.key === "End") {
+        event.preventDefault();
+        resumeTrack.scrollTo({ left: resumeMaxScroll(), behavior: "smooth" });
+      }
+    });
+
+    updateResumeTimeline();
+  }
 })();
