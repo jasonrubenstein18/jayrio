@@ -376,7 +376,23 @@
 
       item.classList.toggle("is-open", !isOpen);
       trigger.setAttribute("aria-expanded", !isOpen ? "true" : "false");
-      panel.style.maxHeight = !isOpen ? panel.scrollHeight + "px" : null;
+      if (!isOpen) {
+        panel.style.maxHeight = panel.scrollHeight + "px";
+        // Let tall tables finish layout, then unlock height so nested scroll works.
+        requestAnimationFrame(function () {
+          panel.style.maxHeight = panel.scrollHeight + "px";
+          var unlock = function () {
+            if (item.classList.contains("is-open")) panel.style.maxHeight = "none";
+            panel.removeEventListener("transitionend", unlock);
+          };
+          panel.addEventListener("transitionend", unlock);
+        });
+      } else {
+        panel.style.maxHeight = panel.scrollHeight + "px";
+        requestAnimationFrame(function () {
+          panel.style.maxHeight = null;
+        });
+      }
     });
   });
 
