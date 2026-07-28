@@ -350,7 +350,7 @@ strong {
   border-radius: 2px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .site-nav__toggle {
     display: flex;
   }
@@ -1809,13 +1809,13 @@ body.has-scrolled .scroll-cue {
 
 .thesis-links {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
   max-width: var(--bleed-max);
   margin: 0 auto;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .thesis-links {
     grid-template-columns: 1fr;
   }

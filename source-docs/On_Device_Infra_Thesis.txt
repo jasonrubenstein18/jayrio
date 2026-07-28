@@ -1,0 +1,1047 @@
+On Device Infra Thesis
+
+“The emergence of agentic AI workloads, to have OpenClaw as an early example, are fundamentally changing user experiences across connected edge devices and reshaping our roadmap in every platform we develop.” - Cristian Amon, Qualcomm Q2 2026 earnings call
+
+GPT 3.5, a 175B parameter model for example, ran on large amounts of A100 GPUs. Google's Gemma 4, released this month, runs a natively multimodal, reasoning capable model with up to 31B parameters, and quantized versions built to fit limited memory architecture (Gemma 4 Technical Report). Benchmark capabilities have grown on edge devices, but tooling to manage, deploy, and update those capabilities has not. Meanwhile, compression once looked solved, but reasoning models broke it, because the predictable accuracy-for-size tradeoff no longer holds. The use cases for small models and edge AI can be grouped into two broad categories: 1) where a product already has a computer on board that a small model can run on (e.g. cars)  2) net new products that are enabled by edge AI devices (e.g. embodied AI systems).
+
+The gap exists because edge hardware does not compare to a datacenter. Researchers have built small models that function on less hardware, but the challenge is preserving capabilities of frontier models.
+
+This thesis makes three claims.
+
+Research that once limited edge AI is mostly solved or on a viable path to a solution, which shifts the constraint from model capability to operations
+
+Value will accrue to two layers: edge fleet control, the operational layer that keeps deployed devices functional and observable, and new compression methods that maintain reasoning ability. These methods have been published by independent researchers at universities who later go on to found companies as well as leading labs such as Deepmind and Deepseek.
+
+The buyers are enterprises and governments running hardware in industrial, medical, defense, or robotic settings where offline operation is essential
+
+What is edge AI and why does it matter?
+
+Edge AI is any AI system that runs on local hardware, smartphones, sensors, wearables, controllers, etc., rather than on a remote server, which is how frontier models like Claude, ChatGPT, and Gemini are served today. The distinction matters for four reasons:
+
+Latency. Inference occurs on device, so requests that take hundreds of milliseconds collapse to single digits. For intended use cases such as tool calling or specific workflows on device inference is very fast, but very complex tasks with large input/output will run slower on device, limited by hardware, etc.
+
+Offline operation. The model comes embedded in the hardware, so it keeps working without a network connection, which matters anywhere connectivity is unreliable or deliberately unavailable.
+
+Privacy. Data never leaves the device, which matters in regulated industries and for any company wary of sending its data across a network it doesn't control.
+
+Cost structure. Spend shifts from a recurring, usage-based inference bill to an upfront hardware purchase. Whether that is cheaper depends on the customer. A company running a huge number of inferences per device recoups the upfront cost fast, while a company with light, sporadic usage may never recover it.
+
+How did edge capabilities improve?
+
+This list could run much longer, but I am sharing six important research areas that, stacked on top of each other, brought edge AI to its current capabilities.
+
+Compact architecture: SqueezeNet proved in 2016 that accuracy and parameter count could decouple. Rather than shrinking large models, researchers designed small models that outperformed what their parameter count would imply. These made deep networks feasible on FPGAs and other memory constrained hardware in robotics, medical devices, and satellites
+
+Compression: Quantization rounds weights to lower precision, pruning eliminates unuseful model information and distillation trains small models to mimic large ones. The Deep Compression work showed that these techniques stack multiplicatively with compact architecture, and follow-on research proved the stack transfers across modalities including speech, beyond language models
+
+The runtime layer: TVM made models portable across hardware targets, and TensorFlow and Lite Micro brought inference to microcontrollers. Then new constructs like llama.ccp and Ollama ran quantized models, without custom engineering. TVM's authors productized their research, spinning out as OctoML, which pivoted toward generative AI infrastructure as OctoAI and sold to Nvidia in September 2024 for a reported $250 million
+
+NPUs and per watt performance: Phones, for example, include dedicated AI chips that drain very little battery. Apple integrates its own neural engines into custom systems on chips (SoCs), and a competitive market of standalone players such as Hailo, Axelera, Sima, Kneron, Syntiant, EdgeCortix, Blaize, BrainChip, Innatera, etc., continues to push the frontier of performance per watt. By owning both the chip and the software eligible to run on it, Apple has limited the opportunity for these competitors. Qualcomm, the top chip supplier for Android devices, is racing to build the same hardware-plus-software stack from the chip side. In their Q2 2026 earnings call, Qualcomm CEO Cristiano Amon said "power efficient NPU for local models will be key assets to delivering agentic AI." NPUs matter for on-device AI systems because they offload neural network calculations from CPUs and GPUs, which delivers power efficiency, stronger data privacy, and zero-latency offline performance.
+
+System algorithm design: MCUNet ran frontier image recognition scale inference on microcontrollers by designing the model and deployment infrastructure together. This moved the field from TinyML, for simple classification, to TinyDL, deep models on constrained hardware, through quantization and hardware-aware architectures. Qualcomm acquired Edge Impulse, previously valued at $230M, in 2021, which vertically integrated this space to chip makers.
+
+Capability density: Improved data curation and distillation from frontier models produced Gemma, Qwen, and small Llama models that perform strongly relative to their parameter counts. Alternative architectures add another lever. liquid time-constant networks showed continuous-time recurrent networks matching larger models on time-series tasks with a fraction of the neurons, and state space models like Mamba process large inputs without traditional memory requirements becoming problematic. These matter for devices where a transformer's attention cache, for example, exhausts available RAM. Google's Gemma 4 sits at the front of this domain today. It shares a cache across layers to cut memory and compute, and its mobile quantization scheme targets the deployment problem I cover below. But first:
+
+Why reasoning is hard on a single device
+
+Language models generate one token at a time, and each token depends on the one before it, so the output does not naturally parallelize. A reasoning model that thinks for thousands of tokens before answering compounds this challenge. On a datacenter GPU cluster, providers hide the cost by splitting prefill, reading the prompt, from decode, generating tokens, across separate pools of machines and batching many users' requests together, so the hardware never is idle waiting on a single user's next token. An edge device serving one person at a time cannot batch this way, so the same thinking methods that work in a datacenter run slowly on the device.
+
+The published fixes, speculative decoding (a small draft model proposes several tokens that a larger model verifies in parallel), prefix caching/KV transfer (reusing key-value computations across repeated context instead of recomputing them), sparse-to-dense decoding, and lookahead decoding, are shipping in production inference today. My take is that this layer is a weaker standalone venture opportunity: these techniques are published quickly, absorbed into open source runtimes, and become table stakes rather than a moat. The likely outcome mirrors what happened to the runtime layer itself, a useful wedge that ends up as a feature of the deployment platforms described below rather than a company. I have accordingly treated it as background for this thesis rather than as a fourth category with its own company table.
+
+With the technical background in place, the next question is where a standalone company can capture value. Three approaches look investable to me.
+
+Opportunities
+
+Three opportunities look investable, each covering a different part of the deployment stack:
+
+Reasoning-preserving compression (the model layer)
+
+Compression was a previously solved problem. Using a combination of quantization, pruning, and distillation a model’s performance degraded in a predictable way and teams made known tradeoffs of accuracy for size and speed. Reasoning models upended this philosophy, because performance degradation compounds across the model’s reasoning chain. This problem remains unsolved, and acquirers have already bought compression startups such as Neural Magic (acq. by Redhat in January 2025) and OctoML (acq. by Nvidia for $250M in September 2024). These were not massive outcomes, but they prove the problem matters to frontier companies willing to acquire the teams solving it. The outcomes for companies currently in this space most likely end up similar in size, but the potential set of acquirers is larger today which could yield a higher price. As investors at an early stage it would be wise to be price sensitive given the likelihood of early acquisition.
+
+Researchers explore three solution categories to resolve this:
+
+Protect weights that carry important reasoning signals. Standard compression methods often fail on reasoning models because they focus on short text prompts rather than the model's inner decoding path. To solve this, Reasoning-Aware Compression (RAC) collects signals from the model's actual self-generated chain-of-thought traces, preventing compressed models from "rambling" or losing logic. Similarly, Causal Attribution Pruning (CAP) maps critical paths by masking attention heads during small logic tests to isolate and protect the weights with the highest causal impact on multi-step deduction. Studies analyzing Large Reasoning Models (LRMs) find that logic is highly concentrated in the Multi-Layer Perceptron (MLP) of the final layers. By protecting as little as 2% of these weights from over-compression, developers preserve the model's full analytical capacity at a fraction of the original size.
+
+Compressing the reasoning trace itself. Reasoning Path Compression measures the semantic sparsity of a chain of thought, how much a reasoning trace repeats itself, checks its own work, or re-derives the same intermediate step, and periodically removes unnecessary information from the KV cache. This reduces cache size by up to 75% and lifts throughput by 1.6x, with only a 1.2 point accuracy decrease. A second approach, step entropy, scores each reasoning step by information content and removes low-entropy filler steps keeping only the high-value ones.
+
+Fixing specific failure modes that compression introduces. Quantizing a reasoning model can make it overthink: researchers at Meta FAIR found that in up to 52% of a quantized model's wrong answers, the model reached the right answer at some intermediate step and then talked itself out of it. The leading fixes stay intuitive, adding a small penalty mechanism when models output tokens such as "but" or "wait" that mark the model as second guessing itself. This cut chain of thought length by up to 28% with negligible impact on accuracy.
+
+Gemma 4 from Google combines these research trends. Its mobile quantization scheme applies targeted precision to the layers that generate tokens while holding the model's core reasoning at higher precision. Enterprise willingness to pay can be projected through two lenses. The first is measurable today. A compression vendor that lets customers complete the same work at lower inference cost has a clean, quantifiable pitch. The second is earlier but larger in my opinion. Capable small models unlock edge workflows that cloud model size and economics prohibit, expanding both what customers can automate and the speed at which they operate. (Appendix 2)
+
+Edge fleet control and observability (owning the deployment layer)
+
+Managing thousands of deployed devices with versioning, model tracking, and observability is a distinct problem from building the small model itself. Leading companies in this space follow a similar production diagram, delivering models with SDKs, providing over the air updates with rollback capability, telemetry that respects privacy constraints, opportunistic routing between on-device and cloud inference, and fallback controls for devices under memory or overheating pressure. This playbook resembles Datadog, which capitalized on a wedge of monitoring existing servers and databases. Fleets of edge devices are a new set of tooling that requires similar infrastructure for key users.
+
+Two distinct categories of companies converge on this opportunity from different starting points. One is legacy device fleet management that began with general IoT and hardware operations (OTA updates, remote debugging, teleoperation) before AI models emerged as an important component. The other is AI native, with strength in ML, quantizing models for specific chips, catching quality regressions fast, and routing queries between device and cloud models, but without the traditional operational expertise and coinciding enterprise relationships.
+
+These two groups will converge. Fleet operations without model expertise, and model operations without fleet oversight, each solve half the customer's problem. Whichever side absorbs the other's advantage most effectively will own this layer. The model native group holds the more durable advantage. Model versioning, quality detection, routing, and compression are ML problems that require novel solutions, while OTA delivery and device preparation and configuration, though not trivial, follow standard conventions that an emergent competitor can absorb. That said, adoption may depend on the end market. In dynamic, unstructured domains like physical AI, model first deployment and observability companies have relatively more important features. In repeatable workflows that run on existing models, manufacturing being the clearest example, the incumbent fleet operators are positioned to lead. The pricing models are very similar between the two groups as well - with many offering an open source or free tier with additional per device, per usage, or enterprise subscriptions.
+
+What do Apple/Samsung (and Qualcomm) do here?
+
+Since 2017 Apple has run a vertically integrated stack from its own silicon to developer protocols. A platform owner that controls the chip, OS, and developer distribution channel may well resist a third party solving for model versioning and OTA updates. Apple commands over half of US smartphone share, and any on-device inference layer for iOS is a feature Apple can absorb into Core ML. However, Apple has shown less relative interest in serving as a vendor for other people's devices such as industrial sensors, medical devices, or robots that run on Android, Linux, or microcontrollers, which are the largest volume form factors of edge AI devices.
+
+Qualcomm poses a more direct threat to independent companies in this space. Its acquisitions of Foundries.io, Edge Impulse, and Nexa AI have moved it up the deployment stack, from silicon into fleet tooling and model operations. Unlike Apple, Qualcomm sells into the fragmented device landscape.  A key question for founders in this space will be how an independent player earns the right to exist as an independent player with Qualcomm and others bringing the same tooling in house. (Appendix 3, Appendix 4)
+
+My opinion here is that independent companies can survive on chip fragmentation, serving mixed fleets across Jetson, Apple, MediaTek, etc. hardware.
+
+Small and micro foundation model providers (owns the underlying model)
+
+The first two approaches were tooling, taking existing models and making them run better on limited hardware. This third group builds models from scratch specifically for edge devices, rather than compressing frontier models. The competition here is well defined and includes not just other startups but also the frontier labs' small models such as Nvidia Nemotron, Phi, Gemma, and Qwen, which improve every few months.
+
+A closer look at Liquid AI
+
+Liquid AI justifies a deeper dive given its customer traction and distinct approach to model development. Built on proprietary liquid time constant networks rather than a standard transformer, Liquid has raised $293M in total at a valuation over $2B since its founding in late 2023. Two capabilities distinguish Liquid AI from its competitors. First, its LFM 2.5-230M model outscored Qwen's 800M and Gemma's 1B parameter models on data extraction benchmarks. Second, its go to market function has closed substantial deals with customers such as AMD and Mercedes Benz, who build on top of the LFM models for their in-car intelligence systems. Notably from conversation with a research scientist they have a deal to be announced soon with BMW (my best guess from his description as a three letter large car company).
+
+Liquid presents a unique, appealing opportunity as a leading candidate to emerge as a standalone winner from this category, given its technical differentiation and OEM distribution beyond simple benchmark performance. This would classify as an opportunity fund / growth investment. (Appendix 5)
+
+Conclusion
+
+As noted above, the three categories I believe are investible within edge AI infrastructure today sit in the model compression, fleet control, and small foundation model verticals. Within each category one company interests me most, though I would welcome a conversation with any of them:
+
+General Instinct: their Instinct Edge pipeline takes frontier models and returns a compressed offline runtime for edge hardware given target latency budgets, and their published methodology compressed a frontier model to 3 bits on a single 8GB GPU by protecting a small "6%" of the always active parameter path, similar to the 2%-MLP finding noted earlier. Their compressed model outperforms Gemma 4 on knowledge and reasoning benchmarks. Given the Neural Magic and OctoML acquisitions in this category, with a relatively bull case outcome near $300M, an entry price below $30M would provide realistic opportunity for a 10x ROI.
+
+Cactus Compute: their open-source engine (5k+ stars, an SDK covering iOS, Android, macOS, and wearables) already handles routing and fallback in production while claiming 5x cost savings at sub 120ms latency. Unlike pure fleet operations vendors, they also publish model layer research. Their TurboQuant-H compressed Gemma 4 by 4x with no measurable performance loss, which unlocks new device categories for deployment with improved speed, battery life, and memory headroom. I believe model-native fleet management companies hold a structural advantage with edge AI devices, and Cactus is well positioned to add fleet versioning and OTA updates onto its installed open source base.
+
+Liquid AI: as highlighted above, Liquid is a small model player that has proven both architectural differentiation and go to market success. Against a competitive set of frontier labs whose small models are secondary offerings and compete mainly on quarterly benchmark performance, Liquid's combination of technical differentiation and OEM partnerships has derisked the company. Liquid is a credible category winner that justifies its current valuation.
+
+Common misconceptions
+
+Edge AI is not 100% secure While hackers and data breaches threaten cloud data, adversaries who physically seize an edge AI device can steal it and extract the data stored on it.
+
+Edge devices are not always cheaper than cloud models. Local processing cuts inference costs, but the edge AI devices themselves carry upfront hardware investments that can add nonnegligible costs. Maintaining consistent software, versions, and a fleet of distributed devices is a complex task, and one where companies have been emerging to help.
+
+Edge AI devices can run both cloud and local models. A core benefit for edge AI devices is that they are able to run AI on devices without data ever leaving which comes with a number of benefits including speed, privacy, etc. However, when connected to the internet it is entirely possible for edge AI devices to use cloud AI models - hardware permitting.
+
+Edge AI and IoT are related but not the same IoT devices collect and transmit information to the cloud, while edge AI devices are local computers running complex onboard operating systems, with the ability to act on information independently without cloud involvement.
+
+_____________________________________________________________________________________
+
+Edge AI applications
+
+Beachhead markets I expand on below include manufacturing, logistics, retail, medical devices, defense, physical AI, automotive systems, and home devices. These can be split into two categories in my mind. Opportunities that already have computers sitting onboard existing systems and can be modernized, which gives small model providers such as Liquid a fast path to market shipping models onto hardware that exists. The other category are markets that have open problems and no incumbent systems, which lets new entrants own devices as well as the underlying infrastructure for model serving and deployment.
+
+On the modernization of the incumbent systems side, three opportunities stand out in manufacturing, logistics, and automotive. All three share that network delays are consequential and offline operation is required, and have computers onboard existing systems today. Automotive has become the beachhead for Liquid AI, having problems small models can solve now. Manufacturing and logistics share the same profile at large scale, which is where small language models can go to market effectively. As shared on past diligence on Realworld, the issue with deployment was that large models did not provide appealing unit economics while small models degraded quality too much. This tradeoff, as apparent from above research, is quickly trending in the right direction as small task specific models become more capable at better cost profiles. One consideration with customer deployments is whether model quality alone is going to be sufficient in limiting per customer deployment effort that would hamper scalability.
+
+Physical AI is the largest opportunity in the no incumbent systems category and is fit to General Instinct's strength compressing large reasoning models onto small hardware. Compression matters most in the most challenging case, humanoids, which must handle unexpected environments and a wide range of tasks that cannot be trained for in advance. Humanoids remain years from broad deployment, so I view them as the expansion market. The entry point is nearer-term embodied systems such as autonomous mobile robots and robotic arms, where the same compression stack applies on shorter timelines. (Appendix 6)
+
+Home devices are the consumer greenfield case, ranging from voice control of a thermostat to a morning news briefing (Echo Statistics). OpenAI has shown it intends to enter the category as well in either late 2026 or early 2027.. Meta previously sought to enter the at home device space when Portal struggled to gain adoption in part due to consumer privacy concerns. Consumer trust in my view will be a durable moat in this category, and it may favor entrants that keep inference on device.
+
+Appendix
+
+Appendix 1:
+
+Network type
+
+How it works
+
+Main data strength
+
+Can it run on a device today?
+
+Primary use case
+
+Transformer
+
+Compares every element of a sequence to every other element at once, weighting how much context each one provides, then repeats that across many layers. Frontier versions use a mixture-of-experts design, activating only the relevant specialist sub-networks per input to save compute.
+
+Text and language; expanding into vision and audio
+
+Moderately. Compressed on-device versions (Apple Intelligence, Gemma Nano) handle summarization and autocomplete; frontier-scale versions still need cloud GPUs.
+
+Generative AI chatbots (ChatGPT, Claude), translation
+
+Diffusion model
+
+Trained to remove noise from data one small step at a time. To generate, it starts from static and refines it step by step, steered by a prompt, until a coherent output emerges.
+
+Images, audio, video generation
+
+Moderately. Compressed versions generate a photo on a flagship phone in seconds with modest quality loss; frontier video generation still needs cloud GPUs.
+
+AI image generation (Stable Diffusion, DALL-E), photo editing, video generation
+
+Convolutional Neural Network (CNN)
+
+Slides small filters across an image, each tuned to detect one simple pattern such as an edge or texture, then stacks those detections into more complex objects like faces.
+
+Images, video
+
+Yes. Large CNNs run fully on laptops and top phone chips; mobile variants (MobileNet, ShuffleNet) run cheaply on weaker hardware.
+
+Facial recognition, medical scan analysis
+
+Mixture of Recursions (MoR) (paper)
+
+Reuses the same block of layers instead of stacking new ones, but decides dynamically how many recursive loops each token needs, skimming easy tokens and looping harder ones through more passes.
+
+Text and language
+
+Yes, by design. Built specifically to cut the memory and compute footprint of large language models for on-device use.
+
+Efficient LLMs, scalable on-device assistants
+
+State Space Model (SSM), e.g. Mamba (2312.00752), Mamba-3
+
+Reads a sequence in order while maintaining a compressed running summary of everything seen so far, rather than comparing every element to every other element.
+
+Long sequences (text, audio, DNA)
+
+Yes, and this is a selling point: steady memory use makes long documents and streams practical on phones and laptops where a transformer's attention cache runs out of room.
+
+Long-document AI assistants, edge language models (often hybridized with transformers, e.g. IBM Granite 4.0)
+
+Liquid Neural Network (LNN) / Liquid Foundation Model (LFM) (paper)
+
+Processes data through a small number of neurons whose behavior changes continuously over time as it arrives, rather than applying a fixed calculation. Inspired by the nervous system of a worm; achieves with dozens of neurons what other networks need thousands to do.
+
+Time-series and sequential data
+
+Yes, this is the design goal. Liquid AI's LFM2.5-230M runs at over 200 tokens/second on a flagship phone and roughly 40 tokens/second on a Raspberry Pi.
+
+Autonomous drones and driving, on-device assistants, edge language models
+
+Graph Neural Network (GNN)
+
+Works on data shaped as networks of connected points, such as molecules, road maps, or social circles. Each point updates its understanding by exchanging information with its neighbors.
+
+Relational and networked data
+
+Yes for most uses. Small GNNs fit on devices, though the largest industrial graphs still live on servers.
+
+Map routing, fraud detection, drug discovery
+
+Artificial Neural Network (ANN / MLP)
+
+Multiplies input values by adjustable weights and passes them through interconnected layers to calculate a final score, like a chain of voting committees passing a weighted opinion down the line.
+
+Tabular and structured data
+
+Yes. Standard on even tiny edge sensors for industrial applications.
+
+Customer churn prediction, sales forecasting
+
+Recurrent Neural Network (RNN) / LSTM
+
+Processes data step by step while feeding its own internal memory back into itself at every turn, like a running notepad updated with each new word or timestamp.
+
+Time-series, audio
+
+Yes, and cheap to run. Has powered offline voice and keyboard features on phones for years, though developers now increasingly favor transformers and liquid networks for new work.
+
+Sensor anomaly detection, time-series forecasting
+
+Appendix 2
+
+Name
+
+Founded
+
+Funding
+
+What they do
+
+How They Monetize
+
+Founder(s)
+
+General Instinct
+
+general-instinct.com
+
+United States
+
+2026 (YC)
+
+Undisclosed, YC
+
+Distills, quantizes, and deploys frontier models onto constrained hardware for physical AI. Give it a model, a target device, and a latency budget and it returns an offline runtime tuned for that budget.
+
+No public monetization model
+
+Bill Jiao
+
+Guanming Wang
+
+ThirdAI
+
+thirdai.com
+
+Houston, TX
+
+2021
+
+$6M seed
+
+(acquired by ServiceNow)
+
+Trains and runs sparse neural networks on CPUs, aiming to make GPU-free training and inference practical for enterprise deployments, including at the edge.
+
+Free desktop apps (pocketLLM, pocketshield) and enterprise sales model with per customer deployments
+
+Anshumali Shrivastava
+
+Tharun Medini
+
+Squeezebits
+
+squeezebits.com
+
+Seoul, South Korea
+
+2021
+
+~$2M pre-Series A
+
+Builds compression and serving tools, including the OwLite optimization toolkit, aimed at cutting inference cost while preserving output quality.
+
+Free tier and enterprise paid tier that is custom quoted. Instead of paying per token, pay for software installation of inference engine onto client servers
+
+Hyungjun Kim
+
+Deeplite
+
+deeplite.ai
+
+Toronto, Canada / San Francisco, CA
+
+2019
+
+Acquired by STMicroelectronics
+
+Automated model optimization (pruning, quantization, neural architecture search) for computer vision and edge deployment across CPU, GPU, and NPU targets.
+
+Sold annual licenses allowing teams to optimize a number of models but enterprise deals charged per device and for integration fees
+
+Nick Romano
+
+Plumerai
+
+plumerai.com
+
+London, UK
+
+2017
+
+$17M
+
+Purpose-built neural network inference software and compression tooling for microcontrollers and other severely memory-constrained edge devices, including binarized neural networks.
+
+Licenses software to camera OEMs and semiconductor partners with per device royalties and licensing fees
+
+Roeland Nusselder
+
+Neural Magic
+
+Somerville, MA
+
+2018
+
+$50M raised
+
+(acquired by Red Hat)
+
+MIT spinout that optimized generative AI inference on commodity CPUs and GPUs; a leading contributor to the vLLM project.
+
+SparseML and tooling were open source monetized through enterprise subscriptions and support
+
+Alexander Matveev
+
+Appendix 3:
+
+Companies on the legacy device-fleet side:
+
+Name
+
+Founded
+
+Funding
+
+What they do
+
+How they monetize
+
+Founder(s)
+
+Viam
+
+viam.com
+
+New York, NY
+
+2020
+
+$117M
+
+Software platform for building and managing robots, IoT devices, and smart machines, spanning robotics, quick-service restaurants, climate tech, marine, and industrial manufacturing. Provides fleet management, remote operations, and AI model deployment on physical devices.
+
+Freemium model with usage based pricing. $5/month of services included and usage fees added. Additional custom solutions that regularly are over $100k/year
+
+Eliot Horowitz
+
+Esper
+
+esper.io
+
+Cincinnati, OH
+
+2018
+
+$102M
+
+Cloud platform for managing fleets of Android, iOS, iPadOS, and Linux devices, specializing in dedicated hardware like POS systems, kiosks, tablets, and telehealth devices. DevOps-style tooling for app deployment, remote debugging, and OS updates at scale.
+
+Per device, monthly SAAS fees plus custom enterprise pricing. 25 device minimums, undercuts Microsoft Intune’s pricing
+
+Yadhu Gopalan
+
+Shiv Sundar
+
+Balena
+
+balena.io
+
+New York, NY
+
+2013
+
+$101M
+
+Container-based platform for building, deploying, and managing fleets of IoT Linux devices (formerly Resin.io). balenaOS is a minimal, container-optimized OS; balenaCloud handles remote monitoring and updates.
+
+Per-device per-month SaaS for balenaCloud with a free developer tier for small fleets, volume discounts as fleets scale, and enterprise contracts. Open source openBalena as well
+
+David Roubach
+
+ZEDEDA
+
+zededa.com
+
+San Jose, CA
+
+2016
+
+$130.1M
+
+SaaS platform for orchestrating distributed edge computing infrastructure across industrial and enterprise environments. Extends cloud-style deployment, security, and visibility to edge hardware running AI and analytics workloads.
+
+Sales-led enterprise SaaS priced per edge node on annual subscription, distributed through direct sales plus OEM and channel partnerships with hardware vendors. Nothing published
+
+Erik Nordmark
+
+Said Ouissal
+
+Golioth
+
+golioth.io
+
+United States
+
+2020
+
+$7.5M
+
+Acq. by Canonical (Ubuntu)
+
+Cloud platform connecting embedded and constrained IoT devices through a firmware SDK: device management, secure firmware updates, and data routing for industrial IoT verticals like energy, agriculture, and waste management.
+
+Usage-based pricing $0.25 per device per month and $0.0095/mb for OTA updates and data routing fees. Formerly had fixed pricing tiers now just usage based
+
+Jonathan Beri
+
+Memfault
+
+memfault.com
+
+San Francisco, CA
+
+2015
+
+$35M acquired 2025
+
+Embedded observability platform: performance monitoring, device debugging, and OTA update capabilities for IoT and edge devices. Now folded into Nordic Semiconductor's chip-to-cloud product line.
+
+SaaS subscription priced per device. Post acquisition product is bundled into Nordic end to end chip to cloud product
+
+Chris Coleman
+
+Francois Baldassari
+
+Appendix 4:
+
+Companies on the AI-native side, which start from the model-compression problem and are building toward fleet operations:
+
+Name
+
+Founded
+
+Funding
+
+What they do
+
+How they monetize
+
+Founder(s)
+
+Latent AI
+
+latentai.com
+
+United States
+
+2018
+
+$31.8M
+
+Edge AI platform built around LEIP, an enterprise SDK that streamlines development and management of ML models at the edge.
+
+Primarily reliant on enterprise clients with system integrations. Given integration model and focus on defense industry longer procurement cycles which caps growth rate
+
+Sek Chai
+
+Jags Kandasamy
+
+RunAnywhere
+
+runanywhere.ai
+
+United States
+
+2025 (YC W26)
+
+Undisclosed, pre-seed
+
+Unified SDK across iOS, Android, React Native, and Flutter that runs multimodal models on-device using a custom Metal GPU kernel engine, paired with a cloud control plane for versioning, rollouts, and routing. 10,000+ GitHub stars.
+
+SDK is available for free serving as an acquisition funnel. Pricing is per seat on device ($0.5/mo per MAU) and up to $0.8-$1 for Metal RT. Third revenue stream is a hosted cloud for hybrid fallback, monetized on usage, framed as a Together AI or Fireworks analog. Model partnerships (Liquid AI, Stellar Labs) are non-monetary – trade inference support for new models
+
+Sanchit Monga
+
+Cactus Compute
+
+cactuscompute.com
+
+United States
+
+2025 (YC S25)
+
+~$1M
+
+Open-source SDK for running LLM, vision, and speech models directly on mobile and wearable devices, cross-platform, without Apple or Google lock-in. Pitched as “CUDA for smartphones.”
+
+Similar to runanywhere SDK is available for free and charges for cloud routing, custom models, support, and advanced features to build private AI into own applications
+
+Henry Ndubuaku
+
+Mirai
+
+trymirai.com
+
+London, UK
+
+2025
+
+$10M
+
+Rust-built inference engine optimized for Apple Silicon, up to 37% faster generation and 59% faster prefill than alternative runtimes.
+
+Their claim was that a general chat product at 100M MAU runs roughly $20M per year in cloud bills, so routing to device is the wedge
+
+Open source core but performance critical kernels private. Premium tier covers the closed inference optimizations (speculative decoding), analytics, support, and heavy customization
+
+Dima Shvets
+
+Alexey Moiseenkov
+
+Muna
+
+muna.ai
+
+United States
+
+2024
+
+NA
+
+Compiles models into native binaries deployable on cloud GPUs or on-device, with the caller choosing where each inference runs.
+
+Bills per second of compute from .10/hr to 3.99/hr for B200’s. Also charge one time cost to deploy models to devices, scaling with fleet size.
+
+Yusuf Olokoba
+
+Argmax
+
+argmaxinc.com
+
+Palo Alto, CA
+
+2023
+
+$7.7M
+
+Provides an on-device AI platform and SDK that enables developers to run foundation models locally, delivering secure, private, and real-time AI experiences offline without relying on cloud servers.
+
+Free open source tier and pro plan at $1.33/device/month (or $1/month on annual) drives the majority of revenue. For enterprise (10k+ devices) pricing is negotiated and not publicly shared
+
+Atila Orhon
+
+Nexa AI (context)
+
+acq. by Qualcomm, 2026
+
+2023
+
+$8.75M Series A pre-acquisition
+
+On-device AI platform with an SDK to compress, accelerate, and deploy models across mobile, automotive, and IoT hardware. Now part of Qualcomm AI Hub
+
+Owned by Qualcomm no longer has an independent GTM arm
+
+Alex Chen
+
+Zack Li
+
+Appendix 5: small foundation model companies
+
+Name
+
+Founded
+
+Funding
+
+What they do
+
+How they monetize
+
+Founder(s)
+
+Liquid AI
+
+liquid.ai
+
+Cambridge, MA
+
+2023
+
+$302M
+
+Liquid Foundation Models (LFMs): non-transformer, liquid time-constant-network-based models built to run on phones, laptops, vehicles, and embedded systems.
+
+Open licensing of models for companies with under $10M of annual revenue. Custom model development and co-development as well as support tiers
+
+Ramin Hasani
+
+Mathias Lechner
+
+Alexander Amini
+
+Daniela Rus
+
+Fastino AI
+
+fastino.ai
+
+Palo Alto, CA
+
+2024
+
+$24.5M
+
+Task-Specific Language Models (TLMs): small models built for one task at a time (redaction, summarization, extraction, classification), trained on under $100K of gaming GPUs and cheap enough to run on a CPU or a Raspberry Pi. Per MongoDB Ventures currently they are doing $10M ARR and entering inference space
+
+Free tier of 10k requests per month and monthly subscription (no usage fees) and enterprise deployment contracts
+
+Ash Lewis
+
+George Hurn-Maloney
+
+Databiomes
+
+databiomes.com
+
+Toronto, Canada
+
+2024
+
+~$1M CAD
+
+Trains custom, ultra-small language models from scratch, running at roughly 400 tokens/second on a consumer CPU with no GPU required. First application is real-time game NPC dialogue and chat moderation
+
+Charge developers a base fee to build custom nano AI models. Marginal cost for additional features
+
+Steven Gans
+
+Tomasz Klempka
+
+Studio Atelico
+
+atelico.studio
+
+San Francisco, CA
+
+2024
+
+$5M
+
+An on-device toolkit (Unreal/Unity/Godot) that trains small, specialized AI models tuned for specific games and tasks instead of using one general cloud model. Demoed via GARP, a village of 20+ autonomous NPCs with memory and planning running on a single GPU.
+
+They sell games directly to consumers and license their Atelico AI Engine to other developers
+
+Piero Molino
+
+Paul Szerlip
+
+JP Chen
+
+Ennio De Nucci
+
+Arcee AI
+
+arcee.ai
+
+Miami, FL
+
+2023
+
+$49M
+
+Flybridge portco
+
+Small Language Models (SLMs) for enterprise. Open-weight Trinity model family plus tooling (Model Merging and Spectrum), which optimizes training time up to 42% and reduces catastrophic forgetting
+
+Enterprise contracts for training and deploying small language  models inside virtual private clouds. Per-token pricing on its model routing and inference products. Open weight model for top of funnel
+
+Mark McQuade
+
+Jacob Solawetz
+
+Brian Benedict
+
+Smallest.ai
+
+smallest.ai
+
+Bengaluru, India (also SF)
+
+2023
+
+$20.5M
+
+Small, fast voice + language models built to beat bigger models on latency and cost rather than raw capability.
+
+Usage-based voice APIs charging per minute of conversation as well as enterprise contracts
+
+Sudarshan Kamath
+
+Akshat Mandloi
+
+Malted AI
+
+malted.ai
+
+Edinburgh, Scotland
+
+2023
+
+$8.8M
+
+Distills large models into small language models that solve one domain-specific problem at 10-100x lower cost than a general model, doing one task near-perfectly instead of many tasks adequately. Selling first into legal and financial services.
+
+Enterprise contract model with no published pricing, custom written to each customer
+
+Iain Mackie
+
+Carlos Gemmell
+
+Federico Rossetto
+
+Featherless AI (aka Recursal AI)
+
+featherless.ai
+
+San Francisco, CA
+
+2023
+
+$25M
+
+Co-created RWKV, the first attention-free AI architecture, a structural alternative to transformers. Commercializes it via a serverless inference platform hosting 30,000+ open-source models with flat-rate pricing and fast model hot-swapping.
+
+Monthly subscription for inference on open source models ($10-25/month) with higher priced enterprise deals
+
+Eugene Cheah
+
+Harrison Vanderbyl
+
+Wesley George
+
+Appendix 6: edge AI application companies by industry
+
+Manufacturing
+
+Example problem
+
+Solution today
+
+Edge AI solution
+
+Adoption level to date
+
+Relevant companies (from thesis)
+
+Human inspectors miss defects, and checking every part by hand slows the production line down
+
+Human inspectors, plus older camera systems programmed with simple rules like "reject anything wider than this measurement”
+
+AI cameras that learn what a defect looks like from examples, running on a small computer on the factory floor so the decision happens instantly instead of being sent to a distant server
+
+High, in production today. One of the largest US steel producers using Matroid's computer vision improved defect detection from 60-70% under human inspection to over 98%, freeing over $2M a year in labor savings (source)
+
+Deeplite, Plumerai, General Instinct
+
+Machines get serviced on a fixed schedule whether they need it or not, so failures still happen between checkups. Unplanned downtime costs companies $1.4T a year, 11% of revenues
+
+(source)
+
+Servicing equipment on a set calendar, say every three months, regardless of its actual condition
+
+Sensors on the machine track vibration, heat, and how the moving parts are behaving, and a small onboard computer watches for early warning signs of a coming failure
+
+High and growing fast. The market was worth $14.2B in 2025, $17.5B in 2026.
+
+(source)
+
+On-device deployment is the fastest-growing segment because real-time fault response requires sub-second reaction, too fast for cloud model latency
+
+ZEDEDA, Golioth
+
+Warehouse and logistics
+
+Example problem
+
+Solution today
+
+Edge AI solution
+
+Adoption level to date
+
+Relevant companies (from thesis)
+
+Warehouses have more orders to fill and fewer people available to fill them
+
+Workers walking the aisles by hand, driven forklifts, and automated carts that follow a fixed wire or track in the floor
+
+Self-driving carts and forklifts that map the warehouse themselves and steer around obstacles, using onboard laser and camera sensors instead of a fixed track
+
+DHL and Locus Robotics passed 500 million picks across 35+ sites in May 2024; Locus crossed 3 billion picks across all customers in April 2024. Walmart targets 65% of stores serviced by automated distribution by end of FY2026. (source)
+
+Viam, Latent AI, General Instinct
+
+Counting stock by hand is slow and error-prone. When a warehouse's records don't match what's actually on the shelf, whether from theft, running out, or over-ordering, costing retailers an estimated $1.73T a year worldwide, 6.5% of global retail sales
+
+(source)
+
+Workers walk the aisles with handheld scanners, often pausing other work to do it
+
+Self-flying drones and floor robots scan barcodes and radio tags on their own, around the clock, and instantly flag anything that doesn't match the inventory system
+
+Moderate. Inventory scanning robots and drones remain a single-digit-billion market today with double-digit projected growth. Warehouse drones alone are projected to hit $7.2B by 2030.
+
+(source)
+
+General Instinct's compression pipeline is model and device agnostic to extend from robots to scanning drones, and Viam's fleet management could stretch here as well. A question is whether compressed models maintain quality, one company we evaluated exited the space when small models could not.
+
+Retail and QSR
+
+Example problem
+
+Solution today
+
+Edge AI solution
+
+Adoption level to date
+
+Relevant companies (from thesis)
+
+Getting orders right and out fast is tied directly to sales, and a restaurant can't afford to go down just because its internet connection drops
+
+A person taking the order, running on a checkout system (POS) that stops working if it loses its internet connection
+
+A small computer installed in the restaurant itself runs the order-checking and kitchen monitoring AI, so it keeps working even if the restaurant's internet goes down
+
+Early. McDonald's announced a multi-year Google Cloud partnership in December 2023 to deploy Google Distributed Cloud hardware inside thousands of restaurants, running applications and AI on-site.
+
+(source)
+
+Viam, Esper. Liquid AI is a plausible model-layer fit,, but McDonald's specifically runs on Google's stack today
+
+Theft and checkout mistakes, industry calls this "shrink", are one of the biggest losses a retailer can actually do something about
+
+Random spot checks by staff, the plastic security tags that trigger an alarm at the exit, and reviewing camera footage after something has already gone missing
+
+A camera and AI system built into the self-checkout station watches whether an item placed in the bagging area actually got scanned, processing everything on the spot instead of sending video to the cloud, which keeps it fast and keeps customer footage more private
+
+Moderate. Shrink costs retailers $112B a year, per the National Retail Federation.
+
+(source)
+
+Vendors are converging on doing this processing on-site for speed and privacy
+
+Cactus Compute could serve this, self-checkout terminals run on iOS and Android, its target platforms. AiFi, Shopic, and NCR Voyix own this space today
+
+Workplace safety
+
+Example problem
+
+Solution today
+
+Edge AI solution
+
+Adoption level to date
+
+Relevant companies (from thesis)
+
+A supervisor can't watch every worker at once. By the time someone notices a violation, the risk moment has passed
+
+Manual spot checks, reviewing what happened only after an incident
+
+Security cameras already installed on site feed into an on-site AI computer that checks whether workers are wearing required safety gear (hard hats, vests, and so on) and warns if someone gets too close to dangerous equipment
+
+Moderate. Sending video to the cloud and waiting for a response is too slow and too costly for alerts that need to happen immediately, so the industry is shifting toward running the AI on-site instead.
+
+(source)
+
+None in the thesis
+
+Driver fatigue causes an estimated 17.6% of fatal U.S. road crashes, roughly 6,000 deaths a year
+
+Digital logs tracking how many hours a driver has been on duty, which measures time behind the wheel, not whether the driver is actually alert
+
+A camera facing the driver, wired to a small onboard computer, watches for signs of drowsiness, slow blinking, head nodding, and sounds an alert before a "microsleep," a brief involuntary doze that can last just a few seconds but is long enough to cause a crash at highway speed
+
+Moderate, regulation is pushing it forward. The EU's General Safety Regulation already mandates drowsiness detection in new vehicles; US adoption runs through fleet insurance economics rather than mandate
+
+No confirmed deployment. Liquid AI is a plausible extension given its existing Mercedes relationship
+
+Healthcare and medical devices
+
+Example problem
+
+Solution today
+
+Edge AI solution
+
+Adoption level to date
+
+Relevant companies (from thesis)
+
+Specialists are scarce outside major hospitals, and sending a scan to the cloud for analysis adds delay and privacy exposure
+
+The scan gets sent off, to a radiologist elsewhere or a cloud service, and results come back later
+
+The scanning device or wearable itself runs a first-pass AI read on the spot, before anything gets sent anywhere
+
+Early. Any AI model that helps diagnose a patient, decide how urgently they need care, or guide treatment falls under the same medical-device regulations
+
+None directly, Esper's telehealth device fleet is the closest adjacent capability. Cactus Compute's SDK targets mobile and wearable devices, which puts it adjacent
+
+An aging population needs continuous monitoring outside the clinic. Falls and missed vital signs drive hospital visits
+
+Periodic caregiver check-ins, monitoring that only happens inside a hospital
+
+Wearables and sensors placed around the home track vital signs and detect falls, processing the data on the spot and alerting someone before it becomes an emergency
+
+Moderate, growing fast. This market was worth $6.47B in 2025, headed toward $25.26B by 2033. (source)
+
+Cactus Compute is a fit. Its SDK targets mobile and wearable devices
+
+Defense and government
+
+Example problem
+
+Solution today
+
+Edge AI solution
+
+Adoption level to date
+
+Relevant companies (from thesis)
+
+Military operations run where communication back to base is jammed or unreliable, cloud servers are unfeasible
+
+Video and sensor data get sent back to a command post far from the action, where analysts review it
+
+The AI runs directly on the drone or device itself with no internet connection needed, built into hardware tough enough to survive extreme heat, cold, shock, and dust under a military durability standard
+
+High budget commitment. The Pentagon's official FY2027 request includes $54.6B for the Defense Autonomous Warfare Group, up from $226M in FY2026, within more than $70B total for drone and counter-drone systems. Most of it is structured as mandatory spending through reconciliation, so passage is politically uncertain. (source)
+
+Latent AI, through its Field Tactical Suite
+
+Borders, ports, and disaster zones need constant threat and hazard detection in places without reliable connectivity
+
+Human patrols and fixed cameras, reviewed only after the fact
+
+AI running directly on drones and sensors, analyzing footage on the spot to spot explosive devices, detect intruders, and assess disaster damage, instead of sending everything back for someone to review later
+
+Early, contract stage. One company's edge platform covers explosive hazard detection, border monitoring, disaster response, and landmine removal support under a government subcontract.
+
+(source)
+
+None directly
+
+Physical AI and humanoid robots
+
+Example problem
+
+Solution today
+
+Edge AI solution
+
+Adoption level to date
+
+Relevant companies (from thesis)
+
+A robot that walks, grabs objects, and reacts to a changing environment needs to think and act instantly. Not practical to use remote servers in real situations
+
+Robots built to do one single job, or robots controlled remotely by a human operator
+
+A powerful chip built into the robot runs the AI directly, but adapted to understand images and physical surroundings, not just text, and to control a body
+
+Low, early. NVIDIA's newest robot chip is roughly 7.5 times more powerful than its predecessor, strong enough to run AI models that used to require a data center, now built directly into the robot. Amazon Robotics, Caterpillar, Boston Dynamics, and Agility Robotics are all building on it.
+
+(source)
+
+General Instinct, Viam, Latent AI
+
+Traditional industrial robots need safety cages and $50-200K+ budgets, pricing out small and mid-size manufacturers from automating repetitive tasks
+
+Manual labor for repetitive assembly and palletizing, or caged industrial robots for larger manufacturers only
+
+Robot arms with onboard vision and force sensing work directly next to people with no cage, since a collision has to be caught instantly
+
+High, currently deployed. IFR reports 64,500 cobot installations in 2024, near 12% of industrial robot installations, up 13% year over year. Edge AI is the opportunity for these cobots to take on more diverse tasks in less controlled environments
+
+(source)
+
+Universal Robots, FANUC, ABB, and KUKA lead this market, but General Instinct's compression work is possibly a fit as these machines expand capabilities
+
+Automotive
+
+Example problem
+
+Solution today
+
+Edge AI solution
+
+Adoption level to date
+
+Relevant companies (from thesis)
+
+The AI features inside a car, voice assistants and safety systems that watch the road (lane-keeping, automatic braking, and similar features are grouped under the term ADAS) need to work without a data connection, not stream constant video to the cloud
+
+Purpose-built chips running older safety systems based on simple rules, like braking automatically if the car ahead gets too close
+
+Small models that can run on the car's own onboard computer instead of a remote server
+
+Moderate, growing. ADAS camera shipments run in the hundreds of millions of units annually
+
+Liquid AI , Nexa AI

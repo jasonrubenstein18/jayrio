@@ -1,9 +1,10 @@
 # Flybridge Investment Theses
 
-A three-page, scroll-driven site presenting two Flybridge investment theses:
+A scroll-driven site presenting three Flybridge investment theses:
 
 - **Continual Learning** — why continual learning is a primary bottleneck on the path to recursive self improvement, and where the startup opportunity sits.
 - **Agentic File Systems** — why file systems are becoming the default interface agents use to store context, and where a standalone company can defend a market position.
+- **On-Device Infra** — why edge model capability is catching up, and where fleet control and reasoning-preserving compression create the opening.
 
 Visual style is modeled on Anthropic's essay ["When AI builds itself"](https://www.anthropic.com/institute/recursive-self-improvement): a long-form scroll layout, a scroll-driven timeline, large pull quotes, and restrained editorial typography. The color palette is pulled from Flybridge's own site (`#DBEAAC`, a sage green accent) on a near-black background, deliberately avoiding Anthropic's cream-and-orange look.
 
@@ -16,11 +17,12 @@ Plain HTML, CSS, and vanilla JavaScript. No build step, no framework, no depende
 ├── index.html                   Landing page
 ├── continual-learning.html      Thesis 01
 ├── agentic-file-systems.html    Thesis 02
+├── on-device-infra.html         Thesis 03
 ├── css/style.css                Shared design system
 ├── js/main.js                   Nav, scroll reveal, timeline scroll-spy,
 │                                 tabs, accordions, dial interactive,
 │                                 market map, collision diagram
-└── source-docs/                 Text/HTML exports of the two source .docx
+└── source-docs/                 Text/HTML exports of the source .docx
                                   files, for reference
 ```
 
@@ -36,7 +38,7 @@ Then open `http://localhost:8000`. Opening `index.html` directly via `file://` a
 
 ## Content sourcing
 
-All company names, figures, quotes, and claims come directly from `Continual Learning Thesis.docx` and `Agentic File Systems Thesis.docx`. Copy was rewritten for the web (shorter sentences, no em dashes, minimal colons, no adverbs) but no data was invented. Where a source table needed a visual, it became either an interactive card grid, a toggleable tab comparison, or a labeled diagram with a "How to read this" caption, chosen per section based on what best serves a reader scanning quickly.
+All company names, figures, quotes, and claims come directly from `Continual Learning Thesis.docx`, `Agentic File Systems Thesis.docx`, and `On Device Infra Thesis (1).docx`. Copy was rewritten for the web (shorter sentences, no em dashes, minimal colons, no adverbs) but no data was invented. Where a source table needed a visual, it became either an interactive card grid, a toggleable tab comparison, or a labeled diagram with a "How to read this" caption, chosen per section based on what best serves a reader scanning quickly.
 
 ## Deploying
 
