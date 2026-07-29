@@ -2357,23 +2357,21 @@ body.has-scrolled .scroll-cue {
   position: relative;
   flex: 1;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: contain;
+  cursor: grab;
   scroll-snap-type: x mandatory;
   scrollbar-width: thin;
   scrollbar-color: var(--accent-soft-2) transparent;
   outline: none;
   -webkit-overflow-scrolling: touch;
-  cursor: grab;
 }
 
+/* Snapping fights a live drag, so it only re-engages once the pointer lifts. */
 .resume-track-wrap.is-dragging {
-  cursor: grabbing;
   scroll-snap-type: none;
+  cursor: grabbing;
   user-select: none;
-}
-
-.resume-track-wrap.is-dragging a {
-  pointer-events: none;
 }
 
 .resume-track-wrap:focus-visible {
@@ -2381,6 +2379,7 @@ body.has-scrolled .scroll-cue {
 }
 
 .resume-track-wrap::-webkit-scrollbar {
+  width: 6px;
   height: 6px;
 }
 
@@ -2609,6 +2608,62 @@ body.has-scrolled .scroll-cue {
 
   .resume-scroll-hint {
     display: none;
+  }
+}
+
+/* Short viewports: compact the page so the longest role still fits on screen. */
+@media (max-height: 860px) {
+  .resume-intro {
+    padding: var(--space-2) 1.5rem 0.4rem;
+  }
+
+  .resume-intro h1 {
+    font-size: clamp(1.75rem, 3.4vw, 2.4rem);
+    margin-bottom: 0.35rem;
+  }
+
+  .resume-intro .lede {
+    font-size: 0.95rem;
+  }
+
+  .resume-track {
+    min-height: 0;
+    padding: 2.25rem 0 2.25rem;
+  }
+
+  .resume-spine {
+    top: calc(2.25rem + 0.55rem);
+  }
+
+  .resume-stop__marker {
+    margin-bottom: 0.9rem;
+  }
+
+  .resume-stop h2 {
+    font-size: clamp(1.45rem, 2.4vw, 1.9rem);
+  }
+
+  .resume-stop__role {
+    font-size: 0.94rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .resume-stop ul {
+    gap: 0.45rem;
+  }
+
+  .resume-stop li {
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+
+  .resume-stop__prior {
+    margin-top: 0.8rem;
+    padding-top: 0.7rem;
+  }
+
+  .resume-end-cta {
+    margin-top: 1rem;
   }
 }
 

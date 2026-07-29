@@ -810,6 +810,9 @@
       resumeStops.forEach(function (stop, i) {
         stop.classList.toggle("is-active", i === index);
       });
+      // A new stop starts from its own first line rather than inheriting the
+      // vertical offset left over from reading a longer one.
+      if (resumeTrack.scrollTop > 0) resumeTrack.scrollTop = 0;
     }
 
     function updateResumeTimeline() {
@@ -870,78 +873,68 @@
       updateResumeTimeline();
     }
 
+    // Vertical wheel is left to the page so the timeline never traps it.
+    // Mouse users move along the arc by dragging, arrow keys, or the scrollbar.
+    var resumeDragPointer = null;
+    var resumeDragStartX = 0;
+    var resumeDragStartLeft = 0;
+    var resumeDragging = false;
+    var resumeDragMoved = false;
+
+    function endResumeDrag(event) {
+      if (resumeDragPointer !== event.pointerId) return;
+      if (resumeTrack.hasPointerCapture(resumeDragPointer)) {
+        resumeTrack.releasePointerCapture(resumeDragPointer);
+      }
+      resumeDragPointer = null;
+      if (!resumeDragging) return;
+      resumeDragging = false;
+      resumeDragMoved = true;
+      resumeTrack.classList.remove("is-dragging");
+    }
+
+    resumeTrack.addEventListener("pointerdown", function (event) {
+      if (event.pointerType !== "mouse" || event.button !== 0) return;
+      if (event.target.closest("a, button")) return;
+      resumeDragPointer = event.pointerId;
+      resumeDragStartX = event.clientX;
+      resumeDragStartLeft = resumeTrack.scrollLeft;
+      resumeDragMoved = false;
+    });
+
+    resumeTrack.addEventListener("pointermove", function (event) {
+      if (resumeDragPointer !== event.pointerId) return;
+      var dx = event.clientX - resumeDragStartX;
+      if (!resumeDragging) {
+        if (Math.abs(dx) < 5) return;
+        resumeDragging = true;
+        resumeTrack.classList.add("is-dragging");
+        resumeTrack.setPointerCapture(event.pointerId);
+      }
+      event.preventDefault();
+      resumeTrack.scrollLeft = resumeDragStartLeft - dx;
+      requestResumeUpdate();
+    });
+
+    resumeTrack.addEventListener("pointerup", endResumeDrag);
+    resumeTrack.addEventListener("pointercancel", endResumeDrag);
+
+    // A drag that ends on a link shouldn't count as a click on it.
     resumeTrack.addEventListener(
-      "wheel",
+      "click",
       function (event) {
-        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-        var max = resumeMaxScroll();
-        if (max <= 0) return;
-        var atStart = resumeTrack.scrollLeft <= 0 && event.deltaY < 0;
-        var atEnd = resumeTrack.scrollLeft >= max - 1 && event.deltaY > 0;
-        if (atStart || atEnd) return;
+        if (!resumeDragMoved) return;
+        resumeDragMoved = false;
         event.preventDefault();
-        resumeTrack.scrollLeft += event.deltaY;
-        requestResumeUpdate();
+        event.stopPropagation();
       },
-      { passive: false }
+      true
     );
 
     resumeTrack.addEventListener("scroll", requestResumeUpdate, { passive: true });
     window.addEventListener("resize", function () {
       layoutResumeTrack(false);
     });
-
-    /* Click-and-drag to scrub the timeline (mouse / pen). Touch keeps native swipe. */
-    var resumeDrag = null;
-
-    resumeTrack.addEventListener("pointerdown", function (event) {
-      if (event.pointerType === "touch") return;
-      if (event.button !== 0) return;
-      resumeDrag = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startScroll: resumeTrack.scrollLeft,
-        moved: false,
-      };
-      resumeTrack.classList.add("is-dragging");
-      resumeTrack.setPointerCapture(event.pointerId);
-    });
-
-    resumeTrack.addEventListener("pointermove", function (event) {
-      if (!resumeDrag || event.pointerId !== resumeDrag.pointerId) return;
-      var dx = event.clientX - resumeDrag.startX;
-      if (!resumeDrag.moved && Math.abs(dx) > 4) resumeDrag.moved = true;
-      if (!resumeDrag.moved) return;
-      event.preventDefault();
-      resumeTrack.scrollLeft = resumeDrag.startScroll - dx;
-      requestResumeUpdate();
-    });
-
-    function endResumeDrag(event) {
-      if (!resumeDrag || event.pointerId !== resumeDrag.pointerId) return;
-      var moved = resumeDrag.moved;
-      resumeDrag = null;
-      resumeTrack.classList.remove("is-dragging");
-      if (moved) {
-        resumeTrack.dataset.dragMoved = "1";
-        var snapIndex = resumeActive >= 0 ? resumeActive : 0;
-        centerResumeStop(snapIndex, "smooth");
-      }
-    }
-
-    resumeTrack.addEventListener("pointerup", endResumeDrag);
-    resumeTrack.addEventListener("pointercancel", endResumeDrag);
-
-    resumeTrack.addEventListener(
-      "click",
-      function (event) {
-        if (resumeTrack.dataset.dragMoved !== "1") return;
-        event.preventDefault();
-        event.stopPropagation();
-        delete resumeTrack.dataset.dragMoved;
-      },
-      true
-    );
 
     resumeTrack.addEventListener("keydown", function (event) {
       if (event.key === "ArrowRight") {
