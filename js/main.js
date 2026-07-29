@@ -810,9 +810,6 @@
       resumeStops.forEach(function (stop, i) {
         stop.classList.toggle("is-active", i === index);
       });
-      // A new stop starts from its own first line rather than inheriting the
-      // vertical offset left over from reading a longer one.
-      if (resumeTrack.scrollTop > 0) resumeTrack.scrollTop = 0;
     }
 
     function updateResumeTimeline() {

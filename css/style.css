@@ -2357,7 +2357,9 @@ body.has-scrolled .scroll-cue {
   position: relative;
   flex: 1;
   overflow-x: auto;
-  overflow-y: auto;
+  /* Vertical overflow stays hidden: a scrollable y-axis here would latch the
+     wheel to the timeline and stop the page from scrolling under the cursor. */
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   cursor: grab;
   scroll-snap-type: x mandatory;
