@@ -2363,6 +2363,17 @@ body.has-scrolled .scroll-cue {
   scrollbar-color: var(--accent-soft-2) transparent;
   outline: none;
   -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
+
+.resume-track-wrap.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+
+.resume-track-wrap.is-dragging a {
+  pointer-events: none;
 }
 
 .resume-track-wrap:focus-visible {

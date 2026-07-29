@@ -891,6 +891,58 @@
       layoutResumeTrack(false);
     });
 
+    /* Click-and-drag to scrub the timeline (mouse / pen). Touch keeps native swipe. */
+    var resumeDrag = null;
+
+    resumeTrack.addEventListener("pointerdown", function (event) {
+      if (event.pointerType === "touch") return;
+      if (event.button !== 0) return;
+      resumeDrag = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startScroll: resumeTrack.scrollLeft,
+        moved: false,
+      };
+      resumeTrack.classList.add("is-dragging");
+      resumeTrack.setPointerCapture(event.pointerId);
+    });
+
+    resumeTrack.addEventListener("pointermove", function (event) {
+      if (!resumeDrag || event.pointerId !== resumeDrag.pointerId) return;
+      var dx = event.clientX - resumeDrag.startX;
+      if (!resumeDrag.moved && Math.abs(dx) > 4) resumeDrag.moved = true;
+      if (!resumeDrag.moved) return;
+      event.preventDefault();
+      resumeTrack.scrollLeft = resumeDrag.startScroll - dx;
+      requestResumeUpdate();
+    });
+
+    function endResumeDrag(event) {
+      if (!resumeDrag || event.pointerId !== resumeDrag.pointerId) return;
+      var moved = resumeDrag.moved;
+      resumeDrag = null;
+      resumeTrack.classList.remove("is-dragging");
+      if (moved) {
+        resumeTrack.dataset.dragMoved = "1";
+        var snapIndex = resumeActive >= 0 ? resumeActive : 0;
+        centerResumeStop(snapIndex, "smooth");
+      }
+    }
+
+    resumeTrack.addEventListener("pointerup", endResumeDrag);
+    resumeTrack.addEventListener("pointercancel", endResumeDrag);
+
+    resumeTrack.addEventListener(
+      "click",
+      function (event) {
+        if (resumeTrack.dataset.dragMoved !== "1") return;
+        event.preventDefault();
+        event.stopPropagation();
+        delete resumeTrack.dataset.dragMoved;
+      },
+      true
+    );
+
     resumeTrack.addEventListener("keydown", function (event) {
       if (event.key === "ArrowRight") {
         event.preventDefault();
